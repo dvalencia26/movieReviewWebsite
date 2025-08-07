@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { useGetMoviesWithReviewsQuery } from '../redux/api/movies';
 import { useGetAllGenresQuery } from '../redux/api/genre';
 import { useDebounce } from '../hooks/useDebounce';
+import { useFavorites } from '../hooks/useFavorites';
 import Loader from '../components/Loader';
 import MovieCard from '../components/MovieCard';
 import { toast } from 'sonner';
@@ -21,6 +22,9 @@ const Movies = () => {
     const [currentPage, setCurrentPage] = useState(1);
     
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    
+    // Load user's favorites and watch later lists for MovieCard components
+    const favoritesHook = useFavorites({ autoLoad: true });
     
     // Redirect to login if not authenticated
     useEffect(() => {
@@ -263,6 +267,7 @@ const Movies = () => {
                                         variant={viewMode === 'list' ? 'compact' : 'detailed'}
                                         linkTo={`/movie/${movie.tmdbId}`}
                                         showActions={true} // Enable favorites and watch later actions
+                                        favoritesData={favoritesHook} // Pass pre-loaded favorites data
                                     />
                                 ))}
                             </div>

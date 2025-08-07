@@ -76,7 +76,7 @@ class APIService {
     );
   }
 
-  // Request deduplication helper
+  // Request deduplication helper - Prevents duplicate API calls
   async makeRequest(requestKey, requestFn) {
     // Check if this request is already pending
     if (this.pendingRequests.has(requestKey)) {
@@ -259,6 +259,45 @@ class APIService {
 
   async toggleCommentLike(commentId) {
     return this.client.post(`/movies/comments/${commentId}/like`);
+  }
+
+  // New Like System Methods (using dedicated Like model)
+  async toggleLike(contentType, contentId) {
+    return this.client.post('/likes/toggle', { contentType, contentId });
+  }
+
+  async getLikeCount(contentType, contentId) {
+    return this.retryRequest(() => 
+      this.client.get(`/likes/count/${contentType}/${contentId}`)
+    );
+  }
+
+  async checkUserLike(contentType, contentId) {
+    return this.retryRequest(() => 
+      this.client.get(`/likes/check/${contentType}/${contentId}`)
+    );
+  }
+
+  async getLikesWithUsers(contentType, contentId, limit = 10) {
+    return this.retryRequest(() => 
+      this.client.get(`/likes/${contentType}/${contentId}/users?limit=${limit}`)
+    );
+  }
+
+  async getLikeStats(contentType, contentId) {
+    return this.retryRequest(() => 
+      this.client.get(`/likes/stats/${contentType}/${contentId}`)
+    );
+  }
+
+  async getUserRecentLikes(limit = 20) {
+    return this.retryRequest(() => 
+      this.client.get(`/likes/user/recent?limit=${limit}`)
+    );
+  }
+
+  async batchCheckUserLikes(items) {
+    return this.client.post('/likes/batch-check', { items });
   }
 
   // Admin methods

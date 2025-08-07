@@ -1,6 +1,5 @@
 import profileImage from '../assets/profileImage.jpg';
-import { useGetAdminFavoriteMoviesQuery, useGetAdminWatchLaterMoviesQuery } from '../redux/api/movies';
-import { useGetDashboardStatsQuery } from '../redux/api/dashboard';
+import { useGetAdminFavoriteMoviesQuery, useGetAdminWatchLaterMoviesQuery, useGetTotalReviewsCountQuery } from '../redux/api/movies';
 import MovieCard from '../components/MovieCard';
 import Loader from '../components/Loader';
 import { Film, Star, Clock } from 'lucide-react';
@@ -10,12 +9,12 @@ function AdminProfile() {
     // Fetch admin-specific data
     const { data: favoritesData, isLoading: favoritesLoading } = useGetAdminFavoriteMoviesQuery({ limit: 3 });
     const { data: watchLaterData, isLoading: watchLaterLoading } = useGetAdminWatchLaterMoviesQuery({ limit: 3 });
-    const { data: dashboardData, isLoading: statsLoading } = useGetDashboardStatsQuery();
+    const { data: totalReviewsData, isLoading: statsLoading } = useGetTotalReviewsCountQuery();
 
     // Get the data for each section
     const recentFavorites = favoritesData?.movies || [];
     const recentWatchLater = watchLaterData?.movies || [];
-    const totalReviews = dashboardData?.stats?.totalReviews || 0;
+    const totalReviews = totalReviewsData?.totalReviews || 0;
     return (
         <div className="min-h-screen bg-white-500">
             <main className="flex flex-col items-center py-8">

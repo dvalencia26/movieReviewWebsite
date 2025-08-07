@@ -13,9 +13,10 @@ import genreRoutes from "./routes/genreRoutes.js";
 import moviesRoutes from "./routes/moviesRoutes.js";
 import tmdbRoutes from "./routes/tmdbRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import likeRoutes from "./routes/likeRoutes.js";
 
 // Middleware
-import { generalRateLimit, skipRateLimit } from "./middlewares/rateLimiter.js";
+import { dynamicRateLimit, skipRateLimit } from "./middlewares/rateLimiter.js";
 
 // Config
 dotenv.config();
@@ -61,9 +62,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rate limiting
+// Rate limiting - Use dynamic rate limiting based on user type
 app.use(skipRateLimit);
-app.use(generalRateLimit);
+app.use(dynamicRateLimit);
 
 // API Routes
 app.use("/api/v1/users", userRoutes);
@@ -71,6 +72,7 @@ app.use("/api/v1/genre", genreRoutes);
 app.use("/api/v1/movies", moviesRoutes);
 app.use("/api/v1/tmdb", tmdbRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/likes", likeRoutes);
 
 // API documentation endpoint
 app.get('/api', (req, res) => {
@@ -82,14 +84,16 @@ app.get('/api', (req, res) => {
       genres: '/api/v1/genre',
       movies: '/api/v1/movies',
       tmdb: '/api/v1/tmdb',
-      dashboard: '/api/v1/dashboard'
+      dashboard: '/api/v1/dashboard',
+      likes: '/api/v1/likes'
     },
     documentation: {
       users: 'User authentication and profile management',
       genres: 'Movie genres management',
       movies: 'Movie reviews and comments',
       tmdb: 'The Movie Database API proxy',
-      dashboard: 'Admin dashboard statistics'
+      dashboard: 'Admin dashboard statistics',
+      likes: 'Like system for reviews and comments'
     }
   });
 });

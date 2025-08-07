@@ -957,3 +957,14 @@ export const getAdminWatchLaterMovies = asyncHandler(async (req, res) => {
     });
   }
 });
+
+// Public: get total published reviews count (for About/AdminProfile page)
+export const getTotalReviewsCount = asyncHandler(async (req, res) => {
+  try {
+    const totalReviews = await Review.countDocuments({ isPublished: true });
+    res.json({ totalReviews });
+  } catch (error) {
+    console.error('Error getting total reviews count:', error);
+    res.status(500).json({ error: 'Failed to get total reviews count', message: error.message });
+  }
+});

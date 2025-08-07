@@ -9,7 +9,8 @@ const MovieSection = ({
     error = null,
     showViewAll = false,
     viewAllLink = null,
-    className = ''
+    className = '',
+    favoritesData = null
 }) => {
     const scrollContainerRef = useRef(null);
 
@@ -127,6 +128,7 @@ const MovieSection = ({
                                 variant="detailed"
                                 showActions={true}
                                 linkTo={`/movie/${movie.tmdbId}`}
+                                favoritesData={favoritesData}
                             />
                         </div>
                     ))}

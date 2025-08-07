@@ -70,8 +70,8 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 { type: "Movies", id: tmdbId },
                 { type: "Reviews", id: `movie-${tmdbId}` }
             ],
-            // Cache movie details for 10 minutes since they don't change often
-            keepUnusedDataFor: 600,
+            // Cache movie details for 30 minutes since they don't change often
+            keepUnusedDataFor: 1800,
         }),
         getMovieReviews: builder.query({
             query: ({ tmdbId, page = 1 }) => ({
@@ -82,8 +82,8 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 { type: "Reviews", id: `${tmdbId}-${page}` },
                 { type: "Reviews", id: `movie-${tmdbId}` }
             ],
-            // Cache reviews for 5 minutes since they're updated more frequently
-            keepUnusedDataFor: 300,
+            // Cache reviews for 15 minutes - reviews don't change that frequently
+            keepUnusedDataFor: 900,
         }),
         getReviewComments: builder.query({
             query: ({ reviewId, page = 1 }) => ({
@@ -126,6 +126,15 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 { type: "Reviews", id: `movie-${result?.tmdbId}` }
             ],
         }),
+        // Public total reviews count
+        getTotalReviewsCount: builder.query({
+            query: () => ({
+                url: `${MOVIES_URL}/stats/total-reviews`,
+                method: "GET",
+            }),
+            providesTags: ["Reviews"],
+            keepUnusedDataFor: 1800,
+        })
     }),
 });
 
@@ -143,4 +152,4 @@ export const {
     useCreateReviewMutation,
     useAddCommentMutation,
     useToggleReviewLikeMutation
-} = moviesApiSlice; 
+ ,useGetTotalReviewsCountQuery} = moviesApiSlice;

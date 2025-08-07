@@ -101,6 +101,16 @@ router.get('/highest-rated',
   getHighestRatedMovies
 );
 
+// Get total published reviews count (public)
+router.get('/stats/total-reviews',
+  generalRateLimit,
+  async (req, res, next) => {
+    // Inline import to avoid circular dependencies
+    const { getTotalReviewsCount } = await import('../controllers/movieController.js');
+    return getTotalReviewsCount(req, res, next);
+  }
+);
+
 // Get movie details by TMDB ID (creates movie if not exists)
 router.get('/:tmdbId',
   generalRateLimit,

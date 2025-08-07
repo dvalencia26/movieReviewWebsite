@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Calendar, Users, Heart, Clock, MessageCircle, ThumbsUp, Eye, Film, Edit } from 'lucide-react';
-import { useGetMovieDetailsQuery, useGetMovieReviewsQuery, useGetReviewCommentsQuery, useAddCommentMutation, useToggleReviewLikeMutation } from '../redux/api/movies';
+import { ArrowLeft, Star, Calendar, Users, Heart, Clock, MessageCircle, Eye, Film, Edit } from 'lucide-react';
+import { useGetMovieDetailsQuery, useGetMovieReviewsQuery, useGetReviewCommentsQuery, useAddCommentMutation } from '../redux/api/movies';
 import { useSelector } from 'react-redux';
 import { useFavorites } from '../hooks/useFavorites';
 import { toast } from 'sonner';
 import Loader from '../components/Loader';
 import CommentSection from '../components/CommentSection';
+import LikeButton from '../components/LikeButton';
 import { decodeHtmlEntities, formatTextContent } from '../utils/textUtils';
 
 const MovieReviewPage = () => {
@@ -17,18 +18,18 @@ const MovieReviewPage = () => {
   const [expandedReview, setExpandedReview] = useState(null);
   const [reviewComments, setReviewComments] = useState({});
 
-  // Favorites hook
+  // Favorites hook - Load data for this page
   const {
     isFavorite,
     isInWatchLater,
     toggleFavorite,
     toggleWatchLater,
     isActionLoading
-  } = useFavorites();
+  } = useFavorites({ autoLoad: true });
 
   // API mutations
   const [addComment, { isLoading: isAddingComment }] = useAddCommentMutation();
-  const [toggleLike, { isLoading: isTogglingLike }] = useToggleReviewLikeMutation();
+  // Review like handled via new Like model using LikeButton
 
   // Fetch movie details and reviews using Redux API
   const { data: movieData, isLoading: movieLoading, error: movieError } = useGetMovieDetailsQuery(id);
@@ -58,46 +59,33 @@ const MovieReviewPage = () => {
   };
 
   // Handle review like toggle
-  const handleToggleLike = async (reviewId) => {
-    if (!userInfo) {
-      toast.error('Please login to like reviews');
-      return;
-    }
+  // Deprecated old review like handler removed; LikeButton now manages likes
 
-    try {
-      await toggleLike({ reviewId }).unwrap();
-      toast.success('Review liked!');
-    } catch (error) {
-      console.error('Error toggling like:', error);
-      toast.error('Failed to update like');
-    }
-  };
-
-  // Handle favorites toggle
-  const handleFavoriteToggle = async () => {
+  // Handle favorites toggle - Memoized to prevent re-renders
+  const handleFavoriteToggle = useCallback(async () => {
     if (!userInfo) {
       toast.error('Please login to add to favorites');
       return;
     }
     await toggleFavorite(id);
-  };
+  }, [userInfo, toggleFavorite, id]);
 
-  // Handle watch later toggle
-  const handleWatchLaterToggle = async () => {
+  // Handle watch later toggle - Memoized to prevent re-renders
+  const handleWatchLaterToggle = useCallback(async () => {
     if (!userInfo) {
       toast.error('Please login to add to watch later');
       return;
     }
     await toggleWatchLater(id);
-  };
+  }, [userInfo, toggleWatchLater, id]);
 
   // Toggle review expansion
   const toggleReviewExpansion = (reviewId) => {
     setExpandedReview(expandedReview === reviewId ? null : reviewId);
   };
 
-  // Format review content to preserve line breaks and decode HTML entities
-  const formatReviewContent = (content) => {
+  // Format review content to preserve line breaks and decode HTML entities - Memoized
+  const formatReviewContent = useCallback((content) => {
     if (!content) return null;
     const paragraphs = formatTextContent(content);
     return paragraphs.map((paragraph, index) => (
@@ -105,10 +93,10 @@ const MovieReviewPage = () => {
         {paragraph}
       </p>
     ));
-  };
+  }, []);
 
-  // Enhanced comment section component with real API integration
-  const ReviewCommentSection = ({ reviewId }) => {
+  // Enhanced comment section component with real API integration - Memoized
+  const ReviewCommentSection = useCallback(({ reviewId }) => {
     const { data: commentsData, isLoading: commentsLoading } = useGetReviewCommentsQuery({
       reviewId,
       page: 1
@@ -122,7 +110,7 @@ const MovieReviewPage = () => {
         isLoading={commentsLoading}
       />
     );
-  };
+  }, [handleAddComment]);
 
   // Loading state
   if (movieLoading || reviewsLoading) {
@@ -204,14 +192,6 @@ const MovieReviewPage = () => {
                         <div className="flex items-center space-x-1">
                           <Calendar size={18} />
                           <span>{movie.releaseYear}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star size={18} />
-                          <span>{movie.averageRating?.toFixed(1) || 'N/A'} / 5</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Users size={18} />
-                          <span>{movie.reviewCount || 0} reviews</span>
                         </div>
                       </div>
                     </div>
@@ -390,14 +370,14 @@ const MovieReviewPage = () => {
                     </div>
                     
                     <div className="flex items-center space-x-6 text-sm text-gray-500 mb-6">
-                      <button
-                        onClick={() => handleToggleLike(review._id)}
-                        disabled={isTogglingLike}
-                        className="flex items-center space-x-1 hover:text-purple-600 transition-colors"
-                      >
-                        <ThumbsUp size={16} />
-                        <span>{review.likes || 0} likes</span>
-                      </button>
+                      <LikeButton
+                        contentType="Review"
+                        contentId={review._id}
+                        initialLikeCount={review.likes || 0}
+                        size="md"
+                        variant="minimal"
+                        showCount={true}
+                      />
                       <div className="flex items-center space-x-1">
                         <MessageCircle size={16} />
                         <span>{review.commentCount || 0} comments</span>

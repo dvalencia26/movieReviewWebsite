@@ -1,44 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import apiService from '../services/api';
 import { toast } from 'sonner';
 
-export const useFavorites = () => {
+export const useFavorites = ({ autoLoad = false } = {}) => {
     const { userInfo } = useSelector((state) => state.auth);
     const [favorites, setFavorites] = useState(new Set());
     const [watchLater, setWatchLater] = useState(new Set());
     const [loading, setLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(new Set());
+    const [hasLoaded, setHasLoaded] = useState(false);
 
-    // Load user's favorites and watch later on mount
+    // Shared loader exposed for on-demand fetching
+    const loadLists = useCallback(async () => {
+        if (!userInfo || hasLoaded) return;
+        try {
+            setLoading(true);
+            const [favoritesResponse, watchLaterResponse] = await Promise.all([
+                apiService.getUserFavorites(),
+                apiService.getUserWatchLater()
+            ]);
+
+            const favoriteIds = favoritesResponse.data.favorites?.map(item => item.tmdbId) || [];
+            const watchLaterIds = watchLaterResponse.data.watchLater?.map(item => item.tmdbId) || [];
+
+            setFavorites(new Set(favoriteIds));
+            setWatchLater(new Set(watchLaterIds));
+            setHasLoaded(true);
+        } catch (error) {
+            console.error('Error loading user lists:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [userInfo, hasLoaded]);
+
+    // Auto-load only when explicitly enabled (to avoid global calls)
     useEffect(() => {
-        const loadUserLists = async () => {
-            if (!userInfo) return;
-            
-            try {
-                setLoading(true);
-                const [favoritesResponse, watchLaterResponse] = await Promise.all([
-                    apiService.getUserFavorites(),
-                    apiService.getUserWatchLater()
-                ]);
-                
-                const favoriteIds = favoritesResponse.data.favorites?.map(item => item.tmdbId) || [];
-                const watchLaterIds = watchLaterResponse.data.watchLater?.map(item => item.tmdbId) || [];
-                
-                setFavorites(new Set(favoriteIds));
-                setWatchLater(new Set(watchLaterIds));
-            } catch (error) {
-                console.error('Error loading user lists:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        loadUserLists();
-    }, [userInfo]);
+        if (autoLoad) {
+            loadLists();
+        }
+    }, [autoLoad, loadLists]);
 
-    // Add to favorites
-    const addToFavorites = async (tmdbId) => {
+    // Add to favorites - Memoized to prevent unnecessary re-renders
+    const addToFavorites = useCallback(async (tmdbId) => {
         if (!userInfo) {
             toast.error('Please log in to add to favorites');
             return false;
@@ -62,10 +66,10 @@ export const useFavorites = () => {
                 return newSet;
             });
         }
-    };
+    }, [userInfo]);
 
-    // Remove from favorites
-    const removeFromFavorites = async (tmdbId) => {
+    // Remove from favorites - Memoized to prevent unnecessary re-renders
+    const removeFromFavorites = useCallback(async (tmdbId) => {
         if (!userInfo) return false;
         
         setActionLoading(prev => new Set([...prev, `favorite-${tmdbId}`]));
@@ -90,10 +94,10 @@ export const useFavorites = () => {
                 return newSet;
             });
         }
-    };
+    }, [userInfo]);
 
-    // Add to watch later
-    const addToWatchLater = async (tmdbId) => {
+    // Add to watch later - Memoized to prevent unnecessary re-renders
+    const addToWatchLater = useCallback(async (tmdbId) => {
         if (!userInfo) {
             toast.error('Please log in to add to watch later');
             return false;
@@ -117,10 +121,10 @@ export const useFavorites = () => {
                 return newSet;
             });
         }
-    };
+    }, [userInfo]);
 
-    // Remove from watch later
-    const removeFromWatchLater = async (tmdbId) => {
+    // Remove from watch later - Memoized to prevent unnecessary re-renders
+    const removeFromWatchLater = useCallback(async (tmdbId) => {
         if (!userInfo) return false;
         
         setActionLoading(prev => new Set([...prev, `watchlater-${tmdbId}`]));
@@ -145,39 +149,41 @@ export const useFavorites = () => {
                 return newSet;
             });
         }
-    };
+    }, [userInfo]);
 
-    // Toggle favorites
-    const toggleFavorite = async (tmdbId) => {
+    // Toggle favorites - Memoized to prevent unnecessary re-renders
+    const toggleFavorite = useCallback(async (tmdbId) => {
         if (favorites.has(tmdbId)) {
             return await removeFromFavorites(tmdbId);
         } else {
             return await addToFavorites(tmdbId);
         }
-    };
+    }, [favorites, removeFromFavorites, addToFavorites]);
 
-    // Toggle watch later
-    const toggleWatchLater = async (tmdbId) => {
+    // Toggle watch later - Memoized to prevent unnecessary re-renders
+    const toggleWatchLater = useCallback(async (tmdbId) => {
         if (watchLater.has(tmdbId)) {
             return await removeFromWatchLater(tmdbId);
         } else {
             return await addToWatchLater(tmdbId);
         }
-    };
+    }, [watchLater, removeFromWatchLater, addToWatchLater]);
 
-    // Check if item is in favorites
-    const isFavorite = (tmdbId) => favorites.has(tmdbId);
+    // Check if item is in favorites - Memoized for performance
+    const isFavorite = useCallback((tmdbId) => favorites.has(tmdbId), [favorites]);
 
-    // Check if item is in watch later
-    const isInWatchLater = (tmdbId) => watchLater.has(tmdbId);
+    // Check if item is in watch later - Memoized for performance  
+    const isInWatchLater = useCallback((tmdbId) => watchLater.has(tmdbId), [watchLater]);
 
-    // Check if action is loading
-    const isActionLoading = (action, tmdbId) => actionLoading.has(`${action}-${tmdbId}`);
+    // Check if action is loading - Memoized for performance
+    const isActionLoading = useCallback((action, tmdbId) => actionLoading.has(`${action}-${tmdbId}`), [actionLoading]);
 
     return {
         favorites,
         watchLater,
         loading,
+        hasLoaded,
+        loadLists,
         addToFavorites,
         removeFromFavorites,
         addToWatchLater,

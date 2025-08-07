@@ -11,6 +11,7 @@ import { useFavorites } from '../hooks/useFavorites';
  * @param {function} onClick - Custom click handler (optional)
  * @param {boolean} showActions - Whether to show favorites/watch later actions
  * @param {string} className - Additional CSS classes
+ * @param {Object} favoritesData - Pre-loaded favorites data from parent component (optional)
  */
 const MovieCard = ({ 
     movie, 
@@ -18,15 +19,20 @@ const MovieCard = ({
     linkTo = null, 
     onClick = null,
     showActions = true,
-    className = ''
+    className = '',
+    favoritesData = null
 }) => {
+    // Use passed-in favorites data if available, otherwise load internally
+    const internalFavorites = useFavorites({ autoLoad: !favoritesData });
+    const favorites = favoritesData || internalFavorites;
+    
     const {
         isFavorite,
         isInWatchLater,
         toggleFavorite,
         toggleWatchLater,
         isActionLoading
-    } = useFavorites();
+    } = favorites;
 
     // Handle different movie ID formats
     const movieId = movie.tmdbId || movie.id || movie._id;

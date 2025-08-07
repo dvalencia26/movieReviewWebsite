@@ -1,9 +1,9 @@
 import rateLimit from 'express-rate-limit';
 
-// General rate limiting for all requests
+// General rate limiting for all requests - More generous for normal browsing
 export const generalRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 300, // limit each IP to 300 requests per windowMs (20 per minute)
   message: {
     error: 'Too many requests from this IP',
     message: 'Please try again later',
@@ -186,11 +186,11 @@ export const createCustomRateLimit = (options) => {
 
 // Dynamic rate limiting based on user type
 export const dynamicRateLimit = (req, res, next) => {
-  // Different limits for different user types
+  // Different limits for different user types - More generous
   const limits = {
-    admin: { windowMs: 15 * 60 * 1000, max: 500 },
-    user: { windowMs: 15 * 60 * 1000, max: 100 },
-    guest: { windowMs: 15 * 60 * 1000, max: 50 }
+    admin: { windowMs: 15 * 60 * 1000, max: 1000 },
+    user: { windowMs: 15 * 60 * 1000, max: 500 },
+    guest: { windowMs: 15 * 60 * 1000, max: 200 }
   };
 
   const userType = req.user?.isAdmin ? 'admin' : req.user ? 'user' : 'guest';
