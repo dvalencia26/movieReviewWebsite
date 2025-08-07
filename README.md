@@ -1,18 +1,19 @@
 # WAG Movie Reviews
 
-WAG Movie Reviews is a comprehensive movie review platform that connects movie enthusiasts with professional reviews. Built with modern web technologies, it offers a seamless experience for both administrators who write detailed movie reviews and users who discover, like, and comment on their favorite film reviews.
+WAG Movie Reviews is a movie review platform that connects movie enthusiasts with entertaining reviews. Built with modern web technologies, it offers a seamless experience for both administrators who write detailed movie reviews and users who discover, like, and comment on their favorite film reviews.
 
 ## Project Features
 
+For Administrators
 - **Secure Admin Dashboard** - Protected admin interface for content management.
 - **Movie Database Access** - Browse and search through TMDB's extensive movie catalog.
 - **Review Creation System** - Write detailed reviews with ratings, titles, and content.
 - **Review Management** - Edit, publish, and manage existing reviews.
 
+For authenticated users
 - **Interactive Comments** - Users can leave comments on reviews to engage in discussions.
 - **Personal Collections** - Add movies to favorites and watch later lists.
 - **Movie Search** - Search movies by title, genre, or release year.
-
 - **Secure Authentication** - JWT-based user authentication and authorization.
 - **Performance Optimized** - Caching and rate limiting for efficient API calls.
 
@@ -70,8 +71,6 @@ NODE_ENV=development
 
 ## Running the Application
 
-### Development Mode
-
 The application can be run in two ways:
 
 #### Option 1: Run Both Frontend and Backend Simultaneously
@@ -116,14 +115,13 @@ WAGmovieReviews/
 
 ### Backend
 - **Node.js & Express** - Server-side runtime and web framework
-- **MongoDB ** - Database
+- **MongoDB** - Database
 - **JWT Authentication** - Secure user sessions
 
 ### Frontend
 - **React 19** - Modern React with latest features
 - **Redux Toolkit** - State management with RTK Query
 - **Tailwind CSS** - Utility-first styling framework
-- **Vite** - Fast build tool and development server
 - **React Router** - Client-side routing
 - **Lucide React** - Icon library
 - **Axios** - HTTP client for API requests

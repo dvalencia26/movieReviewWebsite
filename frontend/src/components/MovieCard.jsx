@@ -75,7 +75,7 @@ const MovieCard = ({
                         <img 
                             src={posterUrl} 
                             alt={movie.title}
-                            className="w-full h-full object-cover rounded-lg shadow-md group-hover:shadow-lg transition-shadow"
+                            className="w-full h-full object-contain rounded-lg shadow-md group-hover:shadow-lg transition-shadow"
                         />
                     ) : (
                         <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
@@ -153,7 +153,7 @@ const MovieCard = ({
                             <img
                                 src={posterUrl}
                                 alt={movie.title}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain"
                             />
                         ) : (
                             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -236,7 +236,7 @@ const MovieCard = ({
                     <img
                         src={posterUrl}
                         alt={movie.title}
-                        className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-64 object-contain group-hover:scale-105 transition-transform duration-300"
                     />
                 ) : (
                     <div className="w-full h-64 bg-gray-200 flex items-center justify-center">

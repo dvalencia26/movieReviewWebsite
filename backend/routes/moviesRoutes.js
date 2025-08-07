@@ -21,7 +21,8 @@ import {
   createMovie,
   getAdminFavoriteMovies,
   getHighestRatedMovies,
-  getRecentlyReviewedMovies
+  getRecentlyReviewedMovies,
+  getAdminWatchLaterMovies
 } from "../controllers/movieController.js";
 
 // Middleware imports
@@ -86,6 +87,12 @@ router.get('/recently-reviewed',
 router.get('/admin-favorites',
   generalRateLimit,
   getAdminFavoriteMovies
+);
+
+// Get admin's watch later movies (for admin profile)
+router.get('/admin-watch-later',
+  generalRateLimit,
+  getAdminWatchLaterMovies
 );
 
 // Get highest rated movies from database (for home page)

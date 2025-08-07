@@ -34,6 +34,15 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
             providesTags: ["Movies"],
             keepUnusedDataFor: 600, // Cache for 10 minutes
         }),
+        // New endpoint for admin's watch later movies (for admin profile)
+        getAdminWatchLaterMovies: builder.query({
+            query: ({ limit = 8 } = {}) => ({
+                url: `${MOVIES_URL}/admin-watch-later?limit=${limit}`,
+                method: "GET",
+            }),
+            providesTags: ["Movies"],
+            keepUnusedDataFor: 600, // Cache for 10 minutes
+        }),
         // New endpoint for highest rated movies from database (for home page)
         getHighestRatedMovies: builder.query({
             query: ({ limit = 8 } = {}) => ({
@@ -125,6 +134,7 @@ export const {
     useGetFeaturedMoviesQuery, 
     useGetTopRatedMoviesQuery,
     useGetAdminFavoriteMoviesQuery,
+    useGetAdminWatchLaterMoviesQuery,
     useGetHighestRatedMoviesQuery,
     useGetRecentlyReviewedMoviesQuery,
     useGetMovieDetailsQuery,

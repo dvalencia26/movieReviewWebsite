@@ -104,8 +104,8 @@ const Home = () => {
                                 className="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
                                 data-carousel-prev
                             >
-                                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none">
-                                    <ChevronLeft className="w-4 h-4 text-white" />
+                                <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-main/80 hover:bg-purple-main shadow-lg group-focus:ring-4 group-focus:ring-purple-light group-focus:outline-none transition-all duration-200">
+                                    <ChevronLeft className="w-5 h-5 text-white" />
                                     <span className="sr-only">Previous</span>
                                 </span>
                             </button>
@@ -114,8 +114,8 @@ const Home = () => {
                                 className="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
                                 data-carousel-next
                             >
-                                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none">
-                                    <ChevronRight className="w-4 h-4 text-white" />
+                                <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-main/80 hover:bg-purple-main shadow-lg group-focus:ring-4 group-focus:ring-purple-light group-focus:outline-none transition-all duration-200">
+                                    <ChevronRight className="w-5 h-5 text-white" />
                                     <span className="sr-only">Next</span>
                                 </span>
                             </button>

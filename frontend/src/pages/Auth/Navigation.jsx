@@ -16,7 +16,8 @@ import {
     LayoutDashboard,
     Tags,
     Heart,
-    Plus
+    Plus,
+    Info
 } from "lucide-react";
 import WAGLogo from "../../assets/WAGlogo.png";
 import { useLogoutMutation } from "../../redux/api/users";
@@ -75,6 +76,13 @@ const Navigation = () => {
                             >
                                 <Film size={18} />
                                 <span>Movies</span>
+                            </Link>
+                            <Link 
+                                to="/about" 
+                                className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-white/10"
+                            >
+                                <Info size={18} />
+                                <span>About WAG</span>
                             </Link>
                             {userInfo && userInfo.isAdmin && (
                                 <>
@@ -200,6 +208,13 @@ const Navigation = () => {
                         >
                             <Film size={18} />
                             <span>Movies</span>
+                        </Link>
+                        <Link 
+                            to="/about" 
+                            className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-white/10"
+                        >
+                            <Info size={18} />
+                            <span>About WAG</span>
                         </Link>
                         {userInfo && userInfo.isAdmin && (
                             <>

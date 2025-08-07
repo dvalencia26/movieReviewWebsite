@@ -902,3 +902,58 @@ export const getRecentlyReviewedMovies = asyncHandler(async (req, res) => {
     });
   }
 });
+
+// Get admin's watch later movies
+export const getAdminWatchLaterMovies = asyncHandler(async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 8;
+    
+    // Find admin users
+    const User = (await import('../models/User.js')).default;
+    const adminUsers = await User.find({ isAdmin: true });
+    
+    if (!adminUsers || adminUsers.length === 0) {
+      return res.json({
+        movies: [],
+        total: 0,
+        message: 'No admin users found'
+      });
+    }
+    
+    // Get all admin watch later movies
+    const adminWatchLaterMovies = [];
+    adminUsers.forEach(admin => {
+      admin.watchLater.forEach(watchMovie => {
+        adminWatchLaterMovies.push({
+          ...watchMovie.toJSON(),
+          adminId: admin._id,
+          adminUsername: admin.username
+        });
+      });
+    });
+    
+    if (adminWatchLaterMovies.length === 0) {
+      return res.json({
+        movies: [],
+        total: 0,
+        message: 'No admin watch later movies found'
+      });
+    }
+    
+    // Sort by addedAt date (newest first) and limit
+    const sortedMovies = adminWatchLaterMovies
+      .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt))
+      .slice(0, limit);
+    
+    res.json({
+      movies: sortedMovies,
+      total: sortedMovies.length
+    });
+  } catch (error) {
+    console.error('Error getting admin watch later movies:', error);
+    res.status(500).json({ 
+      error: 'Failed to get admin watch later movies',
+      message: error.message 
+    });
+  }
+});
