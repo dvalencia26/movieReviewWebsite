@@ -7,6 +7,7 @@ import { useFavorites } from '../hooks/useFavorites';
 import { toast } from 'sonner';
 import Loader from '../components/Loader';
 import CommentSection from '../components/CommentSection';
+import { decodeHtmlEntities, formatTextContent } from '../utils/textUtils';
 
 const MovieReviewPage = () => {
   const { id } = useParams(); // This will be the tmdbId
@@ -95,9 +96,11 @@ const MovieReviewPage = () => {
     setExpandedReview(expandedReview === reviewId ? null : reviewId);
   };
 
-  // Format review content to preserve line breaks
+  // Format review content to preserve line breaks and decode HTML entities
   const formatReviewContent = (content) => {
-    return content.split('\n').map((paragraph, index) => (
+    if (!content) return null;
+    const paragraphs = formatTextContent(content);
+    return paragraphs.map((paragraph, index) => (
       <p key={index} className="mb-4 last:mb-0 leading-relaxed">
         {paragraph}
       </p>
@@ -358,7 +361,7 @@ const MovieReviewPage = () => {
                       </div>
                     </div>
                     
-                    <h4 className="font-semibold text-gray-900 text-xl mb-4">{review.title}</h4>
+                    <h4 className="font-semibold text-gray-900 text-xl mb-4">{decodeHtmlEntities(review.title)}</h4>
                     
                     {/* Enhanced review content with proper formatting */}
                     <div className="prose prose-lg max-w-none mb-6 text-gray-700">

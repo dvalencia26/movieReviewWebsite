@@ -48,14 +48,12 @@ export const validateReview = [
   body('title')
     .trim()
     .isLength({ min: 3, max: 200 })
-    .withMessage('Review title must be between 3 and 200 characters')
-    .escape(),
+    .withMessage('Review title must be between 3 and 200 characters'),
   
   body('content')
     .trim()
     .isLength({ min: 10, max: 5000 })
-    .withMessage('Review content must be between 10 and 5000 characters')
-    .escape(),
+    .withMessage('Review content must be between 10 and 5000 characters'),
   
   body('rating')
     .isInt({ min: 1, max: 5 })
@@ -71,8 +69,7 @@ export const validateComment = [
   body('content')
     .trim()
     .isLength({ min: 1, max: 1000 })
-    .withMessage('Comment must be between 1 and 1000 characters')
-    .escape(),
+    .withMessage('Comment must be between 1 and 1000 characters'),
   
   body('parentComment')
     .optional()
@@ -159,8 +156,7 @@ export const validateUserProfile = [
     .isLength({ min: 3, max: 30 })
     .withMessage('Username must be between 3 and 30 characters')
     .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage('Username can only contain letters, numbers, and underscores')
-    .escape(),
+    .withMessage('Username can only contain letters, numbers, and underscores'),
   
   body('email')
     .optional()
@@ -299,8 +295,7 @@ export const validateAdminAction = [
     .optional()
     .trim()
     .isLength({ min: 5, max: 500 })
-    .withMessage('Reason must be between 5 and 500 characters')
-    .escape(),
+    .withMessage('Reason must be between 5 and 500 characters'),
   
   sanitizeInput,
   handleValidationErrors

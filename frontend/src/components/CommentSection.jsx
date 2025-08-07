@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { MessageCircle, Send, ThumbsUp, Reply, User, MoreHorizontal } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom'; // Added Link import
+import { Link } from 'react-router-dom';
+import { decodeHtmlEntities } from '../utils/textUtils';
 
 const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoading = false }) => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -10,14 +11,6 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
   const [showComments, setShowComments] = useState(false);
-
-  // Function to decode HTML entities
-  const decodeHtmlEntities = (text) => {
-    if (!text) return '';
-    const textarea = document.createElement('textarea');
-    textarea.innerHTML = text;
-    return textarea.value;
-  };
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();

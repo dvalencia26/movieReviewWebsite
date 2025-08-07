@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Eye, Star, Calendar, Clock, Users } from 'lucide-react
 import StarRating from '../../components/StarRating';
 import apiService from '../../services/api';
 import { toast } from 'sonner';
+import { decodeHtmlEntities, getWordCount, getReadTime } from '../../utils/textUtils';
 
 const ReviewForm = () => {
   const { tmdbId } = useParams();
@@ -49,10 +50,10 @@ const ReviewForm = () => {
           const review = reviewResponse.data.review;
           setReviewData(review);
           
-          // Pre-fill form with existing review data
+          // Pre-fill form with existing review data 
           setFormData({
-            title: review.title || '',
-            content: review.content || '',
+            title: decodeHtmlEntities(review.title || ''),
+            content: decodeHtmlEntities(review.content || ''),
             rating: review.rating || 0
           });
         } else {
@@ -142,9 +143,10 @@ const ReviewForm = () => {
     setSubmitting(true);
     
     try {
+      // Ensure we're sending clean, decoded text to prevent double-encoding
       const reviewData = {
-        title: formData.title.trim(),
-        content: formData.content.trim(),
+        title: decodeHtmlEntities(formData.title.trim()),
+        content: decodeHtmlEntities(formData.content.trim()),
         rating: formData.rating
       };
       
@@ -176,14 +178,7 @@ const ReviewForm = () => {
     }
   };
 
-  const getWordCount = (text) => {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-  };
-
-  const getReadTime = (text) => {
-    const wordCount = getWordCount(text);
-    return Math.ceil(wordCount / 200); // Average reading speed
-  };
+  // Word count and read time functions are now imported from utils
 
   if (loading) {
     return (
@@ -443,7 +438,7 @@ const ReviewForm = () => {
                   <div className="prose max-w-none">
                     <div className="border-b pb-4 mb-6">
                       <h2 className="text-2xl font-bold text-purple-main mb-2">
-                        {formData.title || 'Review Title'}
+                        {formData.title ? decodeHtmlEntities(formData.title) : 'Review Title'}
                       </h2>
                       <div className="flex items-center space-x-4 text-gray-600">
                         <StarRating rating={formData.rating} readonly size={20} />
@@ -453,7 +448,7 @@ const ReviewForm = () => {
                       </div>
                     </div>
                     <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {formData.content || 'Review content will appear here...'}
+                      {formData.content ? decodeHtmlEntities(formData.content) : 'Review content will appear here...'}
                     </div>
                   </div>
                 )}

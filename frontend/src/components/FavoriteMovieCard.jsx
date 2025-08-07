@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { truncateText } from '../utils/textUtils';
 
 const FavoriteMovieCard = ({ poster, title, rating, description, reviewText, link }) => {
   // Use TMDB poster URL if poster is present
@@ -32,7 +33,7 @@ const FavoriteMovieCard = ({ poster, title, rating, description, reviewText, lin
         <p className="text-black-main text-base lg:text-lg mb-2 line-clamp-3">{description}</p>
         <div className="mt-4">
           <div className="text-purple-main font-bold text-lg mb-1">Review</div>
-          <div className="text-black-light text-sm lg:text-base line-clamp-4">{reviewText ? reviewText.slice(0, 200) + (reviewText.length > 200 ? '...' : '') : 'No review yet.'}</div>
+          <div className="text-black-light text-sm lg:text-base line-clamp-4">{reviewText ? truncateText(reviewText, 200) : 'No review yet.'}</div>
         </div>
       </div>
     </div>
