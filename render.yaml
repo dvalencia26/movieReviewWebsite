@@ -10,9 +10,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
-      - key: MONGODB_URI
+      - key: MONGO_URI
         fromDatabase:
           name: wag-movie-reviews-db
           property: connectionString
@@ -20,8 +18,8 @@ services:
         generateValue: true
       - key: TMDB_API_KEY
         sync: false  # Set this manually in Render dashboard
-      - key: CLIENT_URL
-        value: https://your-netlify-app.netlify.app
+      - key: FRONTEND_URL
+        value: https://wagmoviereviews.netlify.app
 
 # Database
 databases:
