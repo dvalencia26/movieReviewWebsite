@@ -1,4 +1,3 @@
-import WAGLogo from "../assets/WAGlogo.png";
 
 const Loader = () => {
   return (

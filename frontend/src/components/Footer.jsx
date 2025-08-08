@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Film, Heart, User, Settings } from 'lucide-react';
-import WAGLogo from '../assets/WAGlogo.png';
+import WAGLogo from '../assets/WAGLogo.png';
 
 const Footer = ({ showTMDBDisclaimer = false }) => {
     const currentYear = new Date().getFullYear();
