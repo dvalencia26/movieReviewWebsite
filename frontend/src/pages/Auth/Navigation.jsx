@@ -19,7 +19,7 @@ import {
     Plus,
     Info
 } from "lucide-react";
-import WAGLogo from "../../assets/WAGlogo.png";
+import WAGLogo from "../../assets/WAGLogo.png";
 import { useLogoutMutation } from "../../redux/api/users";
 
 const Navigation = () => {
