@@ -11,17 +11,10 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGO_URI
-        fromDatabase:
-          name: wag-movie-reviews-db
-          property: connectionString
+        sync: false # Set this manually in Render dashboard
       - key: JWT_SECRET
         generateValue: true
       - key: TMDB_API_KEY
         sync: false  # Set this manually in Render dashboard
       - key: FRONTEND_URL
         value: https://wagmoviereviews.netlify.app
-
-# Database
-databases:
-  - name: wag-movie-reviews-db
-    plan: starter
