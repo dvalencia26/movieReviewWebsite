@@ -59,7 +59,7 @@ export const tmdbApiSlice = apiSlice.injectEndpoints({
                 };
             },
         }),
-        getTopRatedMovies: builder.query({
+        getTmdbTopRatedMovies: builder.query({
             query: ({ page = 1, batchSize = 1 }) => ({
                 url: `${TMDB_URL}/top_rated?page=${page}&batch_size=${batchSize}`,
                 method: "GET",
@@ -107,7 +107,7 @@ export const tmdbApiSlice = apiSlice.injectEndpoints({
             providesTags: [{ type: 'MovieGenres', id: 'LIST' }],
             keepUnusedDataFor: 3600, // 1 hour for genres
         }),
-        getMovieDetails: builder.query({
+        getTmdbMovieDetails: builder.query({
             query: (tmdbId) => ({
                 url: `${TMDB_URL}/${tmdbId}`,
                 method: "GET",
@@ -125,15 +125,15 @@ export const {
     useGetPopularMoviesQuery,
     useGetNowPlayingMoviesQuery,
     useGetUpcomingMoviesQuery,
-    useGetTopRatedMoviesQuery,
+    useGetTmdbTopRatedMoviesQuery,
     useSearchMoviesQuery,
     useDiscoverMoviesQuery,
     useGetMovieGenresQuery,
-    useGetMovieDetailsQuery,
+    useGetTmdbMovieDetailsQuery,
     useLazyGetPopularMoviesQuery,
     useLazyGetNowPlayingMoviesQuery,
     useLazyGetUpcomingMoviesQuery,
-    useLazyGetTopRatedMoviesQuery,
+    useLazyGetTmdbTopRatedMoviesQuery,
     useLazySearchMoviesQuery,
     useLazyDiscoverMoviesQuery,
     usePrefetch,
@@ -155,7 +155,7 @@ export const prefetchAdjacentPages = (dispatch, currentPage, activeTab, totalPag
                 dispatch(tmdbApiSlice.util.prefetch('getUpcomingMovies', { page: nextPage }, { force: false }));
                 break;
             case 'top_rated':
-                dispatch(tmdbApiSlice.util.prefetch('getTopRatedMovies', { page: nextPage }, { force: false }));
+                dispatch(tmdbApiSlice.util.prefetch('getTmdbTopRatedMovies', { page: nextPage }, { force: false }));
                 break;
         }
     }
@@ -174,7 +174,7 @@ export const prefetchAdjacentPages = (dispatch, currentPage, activeTab, totalPag
                 dispatch(tmdbApiSlice.util.prefetch('getUpcomingMovies', { page: prevPage }, { force: false }));
                 break;
             case 'top_rated':
-                dispatch(tmdbApiSlice.util.prefetch('getTopRatedMovies', { page: prevPage }, { force: false }));
+                dispatch(tmdbApiSlice.util.prefetch('getTmdbTopRatedMovies', { page: prevPage }, { force: false }));
                 break;
         }
     }

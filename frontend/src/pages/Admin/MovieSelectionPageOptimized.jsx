@@ -7,7 +7,7 @@ import {
     useGetPopularMoviesQuery,
     useGetNowPlayingMoviesQuery,
     useGetUpcomingMoviesQuery,
-    useGetTopRatedMoviesQuery,
+    useGetTmdbTopRatedMoviesQuery,
     useSearchMoviesQuery,
     useDiscoverMoviesQuery,
     useGetMovieGenresQuery
@@ -82,7 +82,7 @@ const MovieSelectionPageOptimized = () => {
         { skip: activeTab !== 'upcoming' }
     );
     
-    const topRatedQuery = useGetTopRatedMoviesQuery(
+    const topRatedQuery = useGetTmdbTopRatedMoviesQuery(
         { page: currentPage }, 
         { skip: activeTab !== 'top_rated' }
     );

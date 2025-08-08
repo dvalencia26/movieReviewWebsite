@@ -266,13 +266,54 @@ const MovieReviewPage = () => {
                     )}
                     {movie.director && (
                       <div>
-                        <strong>Director:</strong> {movie.director}
+                        <strong>Director:</strong> {typeof movie.director === 'string' ? movie.director : movie.director.name}
                       </div>
                     )}
                     {movie.cast && movie.cast.length > 0 && (
                       <div className="col-span-2">
-                        <strong>Cast:</strong> {movie.cast.slice(0, 5).join(', ')}
-                        {movie.cast.length > 5 && '...'}
+                        <div className="mb-3">
+                          <strong className="text-gray-900">Cast:</strong>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                          {movie.cast.slice(0, 10).map((actor, index) => {
+                            const actorName = typeof actor === 'string' ? actor : actor.name;
+                            const actorImage = typeof actor === 'object' && actor.profilePath 
+                              ? `https://image.tmdb.org/t/p/w185${actor.profilePath}`
+                              : null;
+                            
+                            return (
+                              <div key={index} className="flex flex-col items-center text-center group">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 mb-2 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 group-hover:shadow-lg transition-shadow">
+                                  {actorImage ? (
+                                    <img
+                                      src={actorImage}
+                                      alt={actorName}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'flex';
+                                      }}
+                                    />
+                                  ) : null}
+                                  <div 
+                                    className={`w-full h-full ${actorImage ? 'hidden' : 'flex'} items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200`}
+                                    style={{ display: actorImage ? 'none' : 'flex' }}
+                                  >
+                                    <Users className="text-purple-400" size={24} />
+                                  </div>
+                                </div>
+                                <span className="text-xs font-medium text-gray-700 line-clamp-2 leading-tight">
+                                  {actorName}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {movie.cast.length > 10 && (
+                          <p className="text-sm text-gray-500 mt-3">
+                            and {movie.cast.length - 10} more cast members...
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
