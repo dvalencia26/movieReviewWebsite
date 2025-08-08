@@ -15,7 +15,7 @@ const MovieReviewPage = () => {
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedReview, setExpandedReview] = useState(null);
+  const [collapsedReviews, setCollapsedReviews] = useState(new Set());
   const [reviewComments, setReviewComments] = useState({});
 
   // Favorites hook - Load data for this page
@@ -79,9 +79,17 @@ const MovieReviewPage = () => {
     await toggleWatchLater(id);
   }, [userInfo, toggleWatchLater, id]);
 
-  // Toggle review expansion
-  const toggleReviewExpansion = (reviewId) => {
-    setExpandedReview(expandedReview === reviewId ? null : reviewId);
+  // Toggle review collapse
+  const toggleReviewCollapse = (reviewId) => {
+    setCollapsedReviews(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reviewId)) {
+        newSet.delete(reviewId);
+      } else {
+        newSet.add(reviewId);
+      }
+      return newSet;
+    });
   };
 
   // Format review content to preserve line breaks and decode HTML entities - Memoized
@@ -95,11 +103,34 @@ const MovieReviewPage = () => {
     ));
   }, []);
 
-  // Enhanced comment section component with real API integration - Memoized
-  const ReviewCommentSection = useCallback(({ reviewId }) => {
-    const { data: commentsData, isLoading: commentsLoading } = useGetReviewCommentsQuery({
+
+  // Component to show real-time comment count
+  const CommentCount = ({ reviewId }) => {
+    const { data: commentsData } = useGetReviewCommentsQuery({
       reviewId,
       page: 1
+    }, {
+      refetchOnMountOrArgChange: true
+    });
+
+    const commentCount = commentsData?.comments?.length || 0;
+
+    return (
+      <div className="flex items-center space-x-1">
+        <MessageCircle size={16} />
+        <span>{commentCount} comments</span>
+      </div>
+    );
+  };
+
+  // Enhanced comment section component with real API integration - Memoized
+  const ReviewCommentSection = useCallback(({ reviewId }) => {
+    const { data: commentsData, isLoading: commentsLoading, refetch } = useGetReviewCommentsQuery({
+      reviewId,
+      page: 1
+    }, {
+      // Force refetch on mount to get fresh data
+      refetchOnMountOrArgChange: true
     });
 
     return (
@@ -108,6 +139,7 @@ const MovieReviewPage = () => {
         initialComments={commentsData?.comments || []}
         onAddComment={handleAddComment}
         isLoading={commentsLoading}
+        onCommentAdded={refetch} // Refetch comments when new comment is added
       />
     );
   }, [handleAddComment]);
@@ -326,7 +358,7 @@ const MovieReviewPage = () => {
           <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                Reviews ({pagination.totalReviews || 0})
+                Reviews
               </h2>
               
               {/* Admin can always create reviews */}
@@ -352,7 +384,7 @@ const MovieReviewPage = () => {
                           <Users className="text-purple-600" size={20} />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">{review.user?.username || 'Anonymous'}</p>
+                          <p className="font-semibold text-gray-900">Billy</p>
                           <p className="text-sm text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
                         </div>
                       </div>
@@ -384,29 +416,30 @@ const MovieReviewPage = () => {
                     
                     <h4 className="font-semibold text-gray-900 text-xl mb-4">{decodeHtmlEntities(review.title)}</h4>
                     
-                    {/* Enhanced review content with proper formatting */}
+                    {/* Enhanced review content with proper formatting - Show full by default */}
                     <div className="prose prose-lg max-w-none mb-6 text-gray-700">
-                      {expandedReview === review._id || (review.content && review.content.length <= 600) ? (
-                        formatReviewContent(review.content)
-                      ) : (
+                      {collapsedReviews.has(review._id) ? (
                         <>
                           {formatReviewContent(review.content.substring(0, 600))}
                           <button
-                            onClick={() => toggleReviewExpansion(review._id)}
+                            onClick={() => toggleReviewCollapse(review._id)}
                             className="text-purple-main hover:text-purple-dark font-medium mt-2 inline-block"
                           >
                             Read more...
                           </button>
                         </>
-                      )}
-                      
-                      {expandedReview === review._id && review.content.length > 600 && (
-                        <button
-                          onClick={() => toggleReviewExpansion(review._id)}
-                          className="text-purple-main hover:text-purple-dark font-medium mt-4 inline-block"
-                        >
-                          Show less
-                        </button>
+                      ) : (
+                        <>
+                          {formatReviewContent(review.content)}
+                          {review.content.length > 600 && (
+                            <button
+                              onClick={() => toggleReviewCollapse(review._id)}
+                              className="text-purple-main hover:text-purple-dark font-medium mt-4 inline-block"
+                            >
+                              Show less
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                     
@@ -419,10 +452,7 @@ const MovieReviewPage = () => {
                         variant="minimal"
                         showCount={true}
                       />
-                      <div className="flex items-center space-x-1">
-                        <MessageCircle size={16} />
-                        <span>{review.commentCount || 0} comments</span>
-                      </div>
+                      <CommentCount reviewId={review._id} />
                       <span>•</span>
                       <span>{review.wordCount || 0} words</span>
                       <span>•</span>

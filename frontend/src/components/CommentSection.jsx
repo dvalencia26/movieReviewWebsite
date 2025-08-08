@@ -76,7 +76,7 @@ const CommentItem = memo(({ comment, isReply = false, onReply }) => (
   </div>
 ));
 
-const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoading = false }) => {
+const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoading = false, onCommentAdded }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,6 +100,11 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
       
       setNewComment('');
       setReplyTo(null);
+      
+      // Trigger refetch of comments after successful submission
+      if (onCommentAdded) {
+        onCommentAdded();
+      }
     } catch (error) {
       // Error handling is done in the parent component
     } finally {
