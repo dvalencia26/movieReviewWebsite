@@ -1,11 +1,18 @@
 import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import { BASE_URL } from "../constants";
 
+// Determine the API base URL
+const isProduction = import.meta.env.MODE === 'production';
+const apiBaseUrl = isProduction 
+    ? 'https://wagwebsite-backend.onrender.com/api/v1'  // Hardcoded for production
+    : BASE_URL; // Relative path for development
+
+console.log('🔧 Redux API - Mode:', import.meta.env.MODE);
+console.log('🔧 Redux API - Using baseUrl:', apiBaseUrl);
+
 // Base query with authentication headers and error handling
 const baseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.MODE === 'production' 
-        ? (import.meta.env.VITE_API_URL || BASE_URL)
-        : BASE_URL, // Use environment variable for production, relative path for development
+    baseUrl: apiBaseUrl,
     credentials: 'include', // Required for cross-site cookies
     prepareHeaders: (headers, { getState }) => {
         const token = getState().auth.userInfo?.token;

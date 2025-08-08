@@ -2,10 +2,17 @@ import axios from 'axios';
 
 class APIService {
   constructor() {
+    // Determine the API base URL
+    const isProduction = import.meta.env.MODE === 'production';
+    const baseURL = isProduction 
+      ? 'https://wagwebsite-backend.onrender.com/api/v1'  // Hardcoded for production
+      : '/api/v1'; // Relative path for development
+    
+    console.log('🔧 API Service - Mode:', import.meta.env.MODE);
+    console.log('🔧 API Service - Using baseURL:', baseURL);
+    
     this.client = axios.create({
-      baseURL: import.meta.env.MODE === 'production' 
-        ? (import.meta.env.VITE_API_URL || '/api/v1')
-        : '/api/v1', // Use environment variable for production, relative path for development
+      baseURL,
       timeout: 15000,
       withCredentials: true, // Required for cross-site cookies
     });
