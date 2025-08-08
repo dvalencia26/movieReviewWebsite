@@ -3,9 +3,11 @@ import axios from 'axios';
 class APIService {
   constructor() {
     this.client = axios.create({
-      baseURL: '/api/v1', // Point to the backend API
+      baseURL: process.env.NODE_ENV === 'production' 
+        ? `${process.env.VITE_API_URL || '/api/v1'}` 
+        : '/api/v1', // Use environment variable for production, relative path for development
       timeout: 15000,
-      withCredentials: true,
+      withCredentials: true, // Required for cross-site cookies
     });
 
     // Request deduplication cache
