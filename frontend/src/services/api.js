@@ -3,8 +3,8 @@ import axios from 'axios';
 class APIService {
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.NODE_ENV === 'production' 
-        ? `${import.meta.env.VITE_API_URL || '/api/v1'}` 
+      baseURL: import.meta.env.MODE === 'production' 
+        ? (import.meta.env.VITE_API_URL || '/api/v1')
         : '/api/v1', // Use environment variable for production, relative path for development
       timeout: 15000,
       withCredentials: true, // Required for cross-site cookies

@@ -1,7 +1,7 @@
 services:
   # Backend API Service
   - type: web
-    name: wag-movie-reviews-api
+    name: wagwebsite-backend
     env: node
     plan: starter
     buildCommand: cd backend && npm install

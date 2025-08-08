@@ -3,8 +3,8 @@ import { BASE_URL } from "../constants";
 
 // Base query with authentication headers and error handling
 const baseQuery = fetchBaseQuery({
-    baseUrl: process.env.NODE_ENV === 'production' 
-        ? `${import.meta.env.VITE_API_URL || BASE_URL}` 
+    baseUrl: import.meta.env.MODE === 'production' 
+        ? (import.meta.env.VITE_API_URL || BASE_URL)
         : BASE_URL, // Use environment variable for production, relative path for development
     credentials: 'include', // Required for cross-site cookies
     prepareHeaders: (headers, { getState }) => {
