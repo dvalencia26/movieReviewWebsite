@@ -9,7 +9,7 @@ import { Route, RouterProvider, createRoutesFromElements, createBrowserRouter } 
 import AdminRoute from './pages/Admin/AdminRoute.jsx'
 import GenreList from './pages/Admin/GenreList.jsx'
 import MovieSelectionPageOptimized from './pages/Admin/MovieSelectionPageOptimized.jsx'
-import ReviewForm from './pages/admin/ReviewForm.jsx'
+import ReviewForm from './pages/Admin/ReviewForm.jsx'
 //import EditReview from './pages/Admin/EditReview.jsx'
 import AdminDashboard from './pages/Admin/Dashboard/AdminDashboard.jsx'
 import AdminUsers from './pages/Admin/AdminUsers.jsx'
