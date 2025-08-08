@@ -1,0 +1,123 @@
+config:
+  target: 'http://localhost:3000'  # Override with --target flag
+  phases:
+    # Warm-up phase
+    - duration: 60
+      arrivalRate: 2
+      name: "Warm-up"
+    
+    # Ramp-up phase  
+    - duration: 120
+      arrivalRate: 2
+      rampTo: 10
+      name: "Ramp-up"
+    
+    # Sustained load
+    - duration: 300
+      arrivalRate: 10
+      name: "Sustained load"
+    
+    # Peak load
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 25
+      name: "Peak load"
+    
+    # Cool down
+    - duration: 60
+      arrivalRate: 25
+      rampTo: 2
+      name: "Cool down"
+
+  # Processor for handling authentication
+  processor: "../config/functions.cjs"
+  
+  # HTTP configuration
+  http:
+    timeout: 30
+    pool: 50
+  
+  # Default headers
+  defaults:
+    headers:
+      'Content-Type': 'application/json'
+      'User-Agent': 'Artillery Load Test v2.0'
+  
+  # Metrics plugins for better reporting
+  plugins:
+    expect: {}
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+scenarios:
+  # Test user registration and login
+  - name: "User Authentication Flow"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/users"
+          json:
+            username: "testuser_{{ $randomString() }}"
+            email: "test_{{ $randomString() }}@example.com"
+            password: "password123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+          expect:
+            - statusCode: [201, 400]  # 400 for duplicate users
+      
+      - post:
+          url: "/api/v1/users/auth"
+          json:
+            email: "admin@example.com"  # Use known admin credentials
+            password: "adminpassword"
+          expect:
+            - statusCode: [200, 401]
+
+  # Test movie browsing (most common user activity)
+  - name: "Browse Movies"
+    weight: 40
+    flow:
+      - get:
+          url: "/api/v1/movies/with-reviews?page=1&limit=10"
+          expect:
+            - statusCode: 200
+      
+      - get:
+          url: "/api/v1/movies/{{ $randomInt(1, 1000) }}"
+          expect:
+            - statusCode: [200, 404]
+      
+      - get:
+          url: "/api/v1/movies/{{ $randomInt(1, 1000) }}/reviews"
+          expect:
+            - statusCode: [200, 404]
+
+  # Test TMDB API calls (most resource intensive)
+  - name: "TMDB Data Fetching"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/v1/tmdb/popular?page=1"
+          expect:
+            - statusCode: 200
+      
+      - get:
+          url: "/api/v1/tmdb/movie/{{ $randomInt(100, 500000) }}"
+          expect:
+            - statusCode: [200, 404]
+      
+      - get:
+          url: "/api/v1/tmdb/search/movie?query=action"
+          expect:
+            - statusCode: 200
+
+  # Test health check endpoint
+  - name: "Health Checks"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/v1/health"
+          expect:
+            - statusCode: 200
+            - hasProperty: "status"

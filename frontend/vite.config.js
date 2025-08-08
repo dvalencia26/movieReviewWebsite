@@ -9,5 +9,24 @@ export default defineConfig({
       "/api": "http://localhost:3000",
       "uploads/": "http://localhost:3000",
     }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          redux: ['@reduxjs/toolkit', 'react-redux'],
+          router: ['react-router-dom'],
+          ui: ['lucide-react', 'flowbite']
+        }
+      }
+    }
+  },
+  define: {
+    // Replace process.env with import.meta.env for Vite
+    'process.env': 'import.meta.env'
   }
 })

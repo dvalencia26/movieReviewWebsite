@@ -60,3 +60,14 @@ export const formatTextContent = (content) => {
   const decodedContent = decodeHtmlEntities(content);
   return decodedContent.split('\n');
 };
+
+// CommonJS exports for Jest compatibility
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    decodeHtmlEntities,
+    truncateText,
+    getWordCount,
+    getReadTime,
+    formatTextContent
+  };
+}

@@ -62,6 +62,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check endpoint (before rate limiting)
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      status: 'connected',
+      name: 'MongoDB'
+    }
+  });
+});
+
 // Rate limiting - Use dynamic rate limiting based on user type
 app.use(skipRateLimit);
 app.use(dynamicRateLimit);

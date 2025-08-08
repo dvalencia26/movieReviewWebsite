@@ -1,0 +1,95 @@
+config:
+  target: 'http://localhost:3000'  # Override with --target flag
+  phases:
+    # Aggressive ramp-up to find breaking point
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 50
+      name: "Aggressive ramp-up"
+    
+    # High sustained load
+    - duration: 180
+      arrivalRate: 50
+      name: "High sustained load"
+    
+    # Spike test
+    - duration: 30
+      arrivalRate: 50
+      rampTo: 100
+      name: "Spike test"
+    
+    # Extreme load (find breaking point)
+    - duration: 60
+      arrivalRate: 100
+      rampTo: 200
+      name: "Extreme load"
+
+  processor: "../config/functions.cjs"
+  
+  # HTTP configuration for stress testing
+  http:
+    timeout: 10
+    pool: 100
+  
+  defaults:
+    headers:
+      'Content-Type': 'application/json'
+      'User-Agent': 'Artillery Stress Test v2.0'
+
+  # Enhanced metrics and monitoring for stress testing
+  plugins:
+    expect: {}
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+scenarios:
+  # Heavy database operations
+  - name: "Database Heavy Operations"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/v1/movies/with-reviews?page={{ $randomInt(1, 10) }}&limit=20"
+          name: "Get movies with pagination"
+          expect:
+            - statusCode: [200, 429]  # 429 for rate limiting
+      
+      - get:
+          url: "/api/v1/tmdb/popular?page={{ $randomInt(1, 5) }}"
+          name: "Get popular movies"
+          expect:
+            - statusCode: [200, 429]
+      
+      - get:
+          url: "/api/v1/movies/{{ $randomInt(1, 1000) }}/reviews"
+          name: "Get movie reviews"
+          expect:
+            - statusCode: [200, 404, 429]
+
+  # API rate limiting stress test
+  - name: "Rate Limiting Stress"
+    weight: 40
+    flow:
+      - loop:
+          - get:
+              url: "/api/v1/tmdb/movie/{{ $randomInt(100, 1000) }}"
+              name: "Rapid TMDB requests"
+              expect:
+                - statusCode: [200, 404, 429]
+          - think: 0.1  # 100ms pause between requests
+        count: 10
+
+  # Memory intensive operations
+  - name: "Memory Intensive"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/v1/tmdb/search/movie?query=action&page={{ $randomInt(1, 20) }}"
+          name: "Search movies"
+          expect:
+            - statusCode: [200, 429]
+      
+      - get:
+          url: "/api/v1/dashboard/stats"
+          name: "Dashboard stats"
+          expect:
+            - statusCode: [200, 401, 429]

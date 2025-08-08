@@ -1,0 +1,29 @@
+services:
+  # Backend API Service
+  - type: web
+    name: wag-movie-reviews-api
+    env: node
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: wag-movie-reviews-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TMDB_API_KEY
+        sync: false  # Set this manually in Render dashboard
+      - key: CLIENT_URL
+        value: https://your-netlify-app.netlify.app
+
+# Database
+databases:
+  - name: wag-movie-reviews-db
+    plan: starter

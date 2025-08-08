@@ -1,0 +1,58 @@
+[build]
+  # Directory to change to before starting a build
+  base = "frontend/"
+  
+  # Directory that contains the deploy-ready HTML files and assets
+  publish = "dist/"
+  
+  # Default build command
+  command = "npm run build"
+
+[build.environment]
+  # Node.js version for build
+  NODE_VERSION = "18"
+  
+  # Enable newer npm features
+  NPM_FLAGS = "--version"
+
+# Redirect rules for SPA (Single Page Application)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Cache control for static assets
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    # CORS headers (if needed for direct API calls)
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+# Environment-specific redirects (optional)
+[context.production.environment]
+  VITE_API_URL = "https://your-backend-app.onrender.com/api/v1"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://your-staging-backend.onrender.com/api/v1"
+
+[context.branch-deploy.environment]
+  VITE_API_URL = "https://your-dev-backend.onrender.com/api/v1"
