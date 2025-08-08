@@ -24,7 +24,7 @@ import Home from './pages/home.jsx'
 import Movies from './pages/Movies.jsx'
 import MovieReviewPage from './pages/MovieReviewPage.jsx'
 import Favorites from './pages/User/Favorites.jsx'
-import Profile from './pages/User/profile.jsx'
+import Profile from './pages/User/Profile.jsx'
 import AdminProfile from './pages/AdminProfile.jsx'
 
 const router = createBrowserRouter(
