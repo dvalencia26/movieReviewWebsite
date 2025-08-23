@@ -1,4 +1,7 @@
 import User from "../models/User.js";
+import Review from "../models/Review.js";
+import Movie from "../models/Movie.js";
+import tmdbService from "../services/tmdbService.js";
 import bcrypt from "bcryptjs";
 import asyncHandler from "../middlewares/asyncHandler.js";
 import createToken from "../utils/createToken.js";
@@ -200,8 +203,6 @@ const addToFavorites = asyncHandler(async (req, res) => {
         // Different logic for admin vs regular users
         if (user.isAdmin) {
             // Admin can only favorite movies they've reviewed
-            const Review = (await import('../models/Review.js')).default;
-            const Movie = (await import('../models/Movie.js')).default;
             
             const review = await Review.findOne({
                 author: userId,
@@ -255,7 +256,6 @@ const addToFavorites = asyncHandler(async (req, res) => {
                 });
             }
             
-            const tmdbService = (await import('../services/tmdbService.js')).default;
             const tmdbMovieData = await tmdbService.getMovieDetails(tmdbId);
             
             if (!tmdbMovieData) {
@@ -398,7 +398,6 @@ const addToWatchLater = asyncHandler(async (req, res) => {
         }
         
         // Get movie data from TMDB
-        const tmdbService = (await import('../services/tmdbService.js')).default;
         const tmdbMovieData = await tmdbService.getMovieDetails(tmdbId);
         
         if (!tmdbMovieData) {
