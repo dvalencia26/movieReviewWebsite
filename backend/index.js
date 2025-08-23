@@ -51,7 +51,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Security headers
+// Security headers and cache control
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -60,6 +60,19 @@ app.use((req, res, next) => {
   
   // Remove X-Powered-By header
   res.removeHeader('X-Powered-By');
+  
+  // Cache control for API endpoints
+  if (req.path.startsWith('/api/v1/movies/admin-favorites')) {
+    res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=1200'); // 10min client, 20min CDN
+  } else if (req.path.startsWith('/api/v1/movies/highest-rated')) {
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600'); // 5min client, 10min CDN
+  } else if (req.path.startsWith('/api/v1/movies/recently-reviewed')) {
+    res.setHeader('Cache-Control', 'public, max-age=180, s-maxage=300'); // 3min client, 5min CDN
+  } else if (req.path.startsWith('/api/v1/movies/') && req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600'); // General movie data
+  } else if (req.path.startsWith('/api/v1/tmdb/') && req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=7200'); // TMDB data rarely changes
+  }
   
   next();
 });

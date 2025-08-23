@@ -765,29 +765,20 @@ export const getAdminFavoriteMovies = asyncHandler(async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 8;
     
-    // Find admin users
-    const User = (await import('../models/User.js')).default;
-    const adminUsers = await User.find({ isAdmin: true });
-    
-    if (!adminUsers || adminUsers.length === 0) {
-      return res.json({
-        movies: [],
-        total: 0,
-        message: 'No admin users found'
-      });
+    // Check cache first
+    const cacheKey = `admin_favorites_${limit}`;
+    const cached = cacheService.getMovie(cacheKey);
+    if (cached) {
+      return res.json(cached);
     }
     
-    // Get all admin favorite movie IDs
-    const adminFavoriteMovieIds = [];
-    adminUsers.forEach(admin => {
-      admin.favoritesReviewed.forEach(fav => {
-        if (fav.movieId) {
-          adminFavoriteMovieIds.push(fav.movieId);
-        }
-      });
-    });
+    // Direct lookup for Billy (much faster than scanning all admins)
+    const User = (await import('../models/User.js')).default;
+    const billy = await User.findOne({ 
+      username: { $regex: /^billy$/i } // Case-insensitive match for "billy" or "Billy"
+    }).select('favoritesReviewed');
     
-    if (adminFavoriteMovieIds.length === 0) {
+    if (!billy || !billy.favoritesReviewed || billy.favoritesReviewed.length === 0) {
       return res.json({
         movies: [],
         total: 0,
@@ -795,38 +786,82 @@ export const getAdminFavoriteMovies = asyncHandler(async (req, res) => {
       });
     }
     
-    // Get the movies with their review data
-    const movies = await Movie.find({
-      _id: { $in: adminFavoriteMovieIds },
-      isActive: true
-    })
-    .sort({ averageRating: -1, reviewCount: -1 })
-    .limit(limit);
+    // Get Billy's favorite movie IDs
+    const favoriteMovieIds = billy.favoritesReviewed
+      .filter(fav => fav.movieId)
+      .map(fav => fav.movieId);
     
-    // For each movie, get the admin reviews
-    const moviesWithReviews = await Promise.all(
-      movies.map(async (movie) => {
-        // Get reviews for this movie by admin users
-        const adminReviews = await Review.find({
-          movieId: movie._id,
-          isPublished: true,
-          author: { $in: adminUsers.map(u => u._id) }
-        })
-        .populate('author', 'username')
-        .sort({ createdAt: -1 })
-        .limit(1); // Just get the first admin review
-        
-        return {
-          ...movie.toJSON(),
-          reviews: adminReviews
-        };
-      })
-    );
+    if (favoriteMovieIds.length === 0) {
+      return res.json({
+        movies: [],
+        total: 0,
+        message: 'No admin favorites found'
+      });
+    }
     
-    res.json({
-      movies: moviesWithReviews,
-      total: moviesWithReviews.length
-    });
+    // Optimized aggregation - direct movie lookup with Billy's reviews
+    const result = await Movie.aggregate([
+      // Match Billy's favorite movies
+      { $match: { _id: { $in: favoriteMovieIds }, isActive: true } },
+      
+      // Get Billy's review for each movie (single lookup)
+      {
+        $lookup: {
+          from: 'reviews',
+          let: { movieId: '$_id' },
+          pipeline: [
+            { 
+              $match: { 
+                $expr: { $eq: ['$movieId', '$$movieId'] },
+                author: billy._id,
+                isPublished: true
+              } 
+            },
+            { $sort: { createdAt: -1 } },
+            { $limit: 1 },
+            {
+              $project: {
+                title: 1,
+                content: 1,
+                rating: 1,
+                createdAt: 1
+              }
+            }
+          ],
+          as: 'reviews'
+        }
+      },
+      
+      // Sort by rating and review count, then limit
+      { $sort: { averageRating: -1, reviewCount: -1 } },
+      { $limit: limit },
+      
+      // Clean output
+      {
+        $project: {
+          tmdbId: 1,
+          title: 1,
+          overview: 1,
+          posterPath: 1,
+          backdropPath: 1,
+          releaseDate: 1,
+          genres: 1,
+          averageRating: 1,
+          reviewCount: 1,
+          reviews: 1
+        }
+      }
+    ]);
+    
+    const response = {
+      movies: result,
+      total: result.length
+    };
+    
+    // Cache for 10 minutes
+    cacheService.setMovie(cacheKey, response, 600);
+    
+    res.json(response);
   } catch (error) {
     console.error('Error getting admin favorite movies:', error);
     res.status(500).json({ 
@@ -841,18 +876,31 @@ export const getHighestRatedMovies = asyncHandler(async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 8;
     
+    // Check cache first
+    const cacheKey = `highest_rated_${limit}`;
+    const cached = cacheService.getMovie(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+    
     const movies = await Movie.find({ 
       isActive: true, 
       reviewCount: { $gt: 0 },
       averageRating: { $gt: 0 }
     })
     .sort({ averageRating: -1, reviewCount: -1 })
-    .limit(limit);
+    .limit(limit)
+    .select('tmdbId title overview posterPath backdropPath releaseDate genres averageRating reviewCount');
     
-    res.json({
+    const response = {
       movies,
       total: movies.length
-    });
+    };
+    
+    // Cache for 5 minutes
+    cacheService.setMovie(cacheKey, response, 300);
+    
+    res.json(response);
   } catch (error) {
     console.error('Error getting highest rated movies:', error);
     res.status(500).json({ 
@@ -867,33 +915,75 @@ export const getRecentlyReviewedMovies = asyncHandler(async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 6;
     
-    // Get recently reviewed movies by finding movies that have recent reviews
-    const Review = (await import('../models/Review.js')).default;
-    const recentReviews = await Review.find({ isPublished: true })
-      .sort({ createdAt: -1 })
-      .limit(limit * 2) // Get more reviews to account for duplicates
-      .populate('movieId');
-    
-    // Extract unique movies from recent reviews
-    const seenMovieIds = new Set();
-    const movies = [];
-    
-    for (const review of recentReviews) {
-      if (review.movieId && !seenMovieIds.has(review.movieId._id.toString())) {
-        seenMovieIds.add(review.movieId._id.toString());
-        movies.push({
-          ...review.movieId.toJSON(),
-          latestReviewDate: review.createdAt
-        });
-        
-        if (movies.length >= limit) break;
-      }
+    // Check cache first
+    const cacheKey = `recent_reviews_${limit}`;
+    const cached = cacheService.getMovie(cacheKey);
+    if (cached) {
+      return res.json(cached);
     }
     
-    res.json({
-      movies,
-      total: movies.length
-    });
+    // Single aggregation query to get recently reviewed movies
+    const result = await Movie.aggregate([
+      // Match active movies with reviews
+      { $match: { isActive: true, reviewCount: { $gt: 0 } } },
+      
+      // Get the latest review for each movie
+      {
+        $lookup: {
+          from: 'reviews',
+          let: { movieId: '$_id' },
+          pipeline: [
+            { 
+              $match: { 
+                $expr: { $eq: ['$movieId', '$$movieId'] },
+                isPublished: true
+              } 
+            },
+            { $sort: { createdAt: -1 } },
+            { $limit: 1 },
+            { $project: { createdAt: 1 } }
+          ],
+          as: 'latestReview'
+        }
+      },
+      
+      // Add latest review date
+      {
+        $addFields: {
+          latestReviewDate: { $arrayElemAt: ['$latestReview.createdAt', 0] }
+        }
+      },
+      
+      // Sort by latest review date and limit
+      { $sort: { latestReviewDate: -1 } },
+      { $limit: limit },
+      
+      // Clean up the output
+      {
+        $project: {
+          tmdbId: 1,
+          title: 1,
+          overview: 1,
+          posterPath: 1,
+          backdropPath: 1,
+          releaseDate: 1,
+          genres: 1,
+          averageRating: 1,
+          reviewCount: 1,
+          latestReviewDate: 1
+        }
+      }
+    ]);
+    
+    const response = {
+      movies: result,
+      total: result.length
+    };
+    
+    // Cache for 3 minutes (recent data changes more frequently)
+    cacheService.setMovie(cacheKey, response, 180);
+    
+    res.json(response);
   } catch (error) {
     console.error('Error getting recently reviewed movies:', error);
     res.status(500).json({ 

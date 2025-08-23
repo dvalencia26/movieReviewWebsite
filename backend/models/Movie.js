@@ -136,6 +136,11 @@ const movieSchema = new mongoose.Schema({
 // Indexes for performance
 movieSchema.index({ title: 'text', overview: 'text' });
 movieSchema.index({ releaseDate: -1 });
+
+// Critical indexes for homepage queries
+movieSchema.index({ isActive: 1, reviewCount: 1, averageRating: -1 }); // For highest-rated
+movieSchema.index({ isActive: 1, reviewCount: 1 }); // For recently-reviewed
+movieSchema.index({ _id: 1, isActive: 1 }); // For admin favorites lookup
 movieSchema.index({ averageRating: -1 });
 movieSchema.index({ reviewCount: -1 });
 movieSchema.index({ popularity: -1 });

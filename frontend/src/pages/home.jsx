@@ -7,7 +7,12 @@ import FavoriteMovieCard from '../components/FavoriteMovieCard';
 import TrendingMovieCard from '../components/TrendingMovieCard';
 import ReviewCard from '../components/ReviewCard';
 import Footer from '../components/Footer';
-import Loader from '../components/Loader';
+import { 
+    FavoriteMovieSkeleton, 
+    ReviewCardSkeleton, 
+    MovieCardSkeleton,
+    SectionSkeleton 
+} from '../components/SkeletonLoader';
 import {
     useGetAdminFavoriteMoviesQuery,
     useGetHighestRatedMoviesQuery,
@@ -46,18 +51,17 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-light to-white-500">
-            {/* Hero Section */}
+            {/* Hero Section - Only show loader if ALL data is loading */}
             <HeroSection 
-                loading={favoritesLoading && trendingLoading && recentLoading}
+                loading={false} // Remove blocking loader from hero
                 userInfo={userInfo}
             />
             {/* Main Content */}
             <main className="container mx-auto px-4 py-12">
                 {/* All Time Favorites Section */}
-                <section className="mb-16">
-                    <h2 className="text-3xl font-bold text-black-main mb-6">All-Time Favorite Movies</h2>
+                <SectionSkeleton title="All-Time Favorite Movies">
                     {favoritesLoading ? (
-                        <Loader />
+                        <FavoriteMovieSkeleton />
                     ) : favoritesError ? (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center text-red-600">{favoritesError.data?.message || 'Failed to load favorites.'}</div>
                     ) : favorites.length === 0 ? (
@@ -121,7 +125,7 @@ const Home = () => {
                             </button>
                         </div>
                     )}
-                </section>
+                </SectionSkeleton>
 
                 {/* Call to Action Section */}
                 <div className="mb-16">
@@ -129,10 +133,13 @@ const Home = () => {
                 </div>
 
                 {/* Latest Reviews Section */}
-                <section className="mb-16">
-                    <h2 className="text-3xl font-bold text-black-main mb-6">Latest Reviews</h2>
+                <SectionSkeleton title="Latest Reviews">
                     {recentLoading ? (
-                        <Loader />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {[...Array(6)].map((_, index) => (
+                                <ReviewCardSkeleton key={index} />
+                            ))}
+                        </div>
                     ) : recentError ? (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center text-red-600">{recentError.data?.message || 'Failed to load reviews.'}</div>
                     ) : recent.length === 0 ? (
@@ -150,13 +157,16 @@ const Home = () => {
                             ))}
                         </div>
                     )}
-                </section>
+                </SectionSkeleton>
 
                 {/* Trending Movies Section */}
-                <section className="mb-16">
-                    <h2 className="text-3xl font-bold text-black-main mb-6">Trending</h2>
+                <SectionSkeleton title="Trending">
                     {trendingLoading ? (
-                        <Loader />
+                        <div className="flex items-center space-x-6 overflow-x-auto scrollbar-hide pb-2">
+                            {[...Array(8)].map((_, index) => (
+                                <MovieCardSkeleton key={index} className="flex-shrink-0 w-48" />
+                            ))}
+                        </div>
                     ) : trendingError ? (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center text-red-600">{trendingError.data?.message || 'Failed to load trending movies.'}</div>
                     ) : trending.length === 0 ? (
@@ -173,17 +183,9 @@ const Home = () => {
                             ))}
                         </div>
                     )}
-                </section>
+                </SectionSkeleton>
 
-                {/* Loading overlay for initial page load */}
-                {(favoritesLoading && trendingLoading && recentLoading) && (
-                    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 shadow-xl">
-                            <Loader />
-                            <p className="text-center mt-4 text-gray-600">Loading amazing movies...</p>
-                        </div>
-                    </div>
-                )}
+
             </main>
 
             {/* Footer with TMDB disclaimer */}

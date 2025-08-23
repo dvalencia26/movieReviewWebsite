@@ -108,6 +108,10 @@ const reviewSchema = new mongoose.Schema({
 reviewSchema.index({ movieId: 1, createdAt: -1 });
 reviewSchema.index({ author: 1, createdAt: -1 });
 reviewSchema.index({ tmdbId: 1, isPublished: 1 });
+
+// Critical indexes for homepage queries
+reviewSchema.index({ movieId: 1, isPublished: 1, createdAt: -1 }); // For recently-reviewed
+reviewSchema.index({ author: 1, movieId: 1, isPublished: 1 }); // For Billy's reviews lookup
 reviewSchema.index({ rating: 1 });
 reviewSchema.index({ likes: -1 });
 reviewSchema.index({ createdAt: -1 });
