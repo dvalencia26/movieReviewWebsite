@@ -8,8 +8,7 @@ class APIService {
       ? 'https://wagwebsite-backend.onrender.com/api/v1'  // Hardcoded for production
       : '/api/v1'; // Relative path for development
     
-    console.log('🔧 API Service - Mode:', import.meta.env.MODE);
-    console.log('🔧 API Service - Using baseURL:', baseURL);
+
     
     this.client = axios.create({
       baseURL,

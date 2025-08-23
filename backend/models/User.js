@@ -115,9 +115,7 @@ const userSchema = mongoose.Schema({
 userSchema.index({ 'favoritesReviewed.tmdbId': 1 });
 userSchema.index({ 'watchLater.tmdbId': 1 });
 
-// Critical index for Billy lookup (case-insensitive)
-userSchema.index({ username: 1 });
-
+// Note: username already has unique index from schema definition
 // Compound index for admin favorites lookup
 userSchema.index({ 'favoritesReviewed.movieId': 1, username: 1 });
 userSchema.index({ 'favoritesReviewed.addedAt': -1 });

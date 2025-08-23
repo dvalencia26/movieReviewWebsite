@@ -17,7 +17,9 @@ import {
     Tags,
     Heart,
     Plus,
-    Info
+    Info,
+    Menu,
+    X
 } from "lucide-react";
 import WAGLogo from "../../assets/WAGLogo.png";
 import { useLogoutMutation } from "../../redux/api/users";
@@ -25,9 +27,14 @@ import { useLogoutMutation } from "../../redux/api/users";
 const Navigation = () => {
     const { userInfo } = useSelector((state) => state.auth);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
+    }
+
+    const toggleMobileMenu = () => {
+        setMobileMenuOpen(!mobileMenuOpen);
     }
 
     const navigate = useNavigate();
@@ -46,9 +53,13 @@ const Navigation = () => {
     };
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-main to-purple-dark shadow-lg backdrop-blur-sm">
-            <div className="container mx-auto px-4">
-                <div className="flex justify-between items-center h-16">
+        <>
+            {/* Spacer div to push content below fixed nav */}
+            <div className="h-16"></div>
+            
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-main to-purple-dark shadow-lg backdrop-blur-sm">
+                <div className="container mx-auto px-4">
+                    <div className="flex justify-between items-center h-16">
                     {/* Left Section - Logo and Navigation Links */}
                     <div className="flex items-center space-x-8">
                         <Link to="/" className="flex items-center space-x-2 hover-scale group">
@@ -98,9 +109,19 @@ const Navigation = () => {
                         </div>
                     </div>
 
-                    {/* Right Section - User Menu */}
-                    <div className="relative">
+                    {/* Right Section - Mobile Menu Toggle & User Menu */}
+                    <div className="flex items-center space-x-4">
+                        {/* Mobile Menu Toggle */}
                         <button 
+                            onClick={toggleMobileMenu}
+                            className="md:hidden text-white hover:text-white/80 transition-colors"
+                        >
+                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                        
+                        {/* User Menu */}
+                        <div className="relative">
+                            <button 
                             onClick={toggleDropdown} 
                             className="flex items-center space-x-2 text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-white/30"
                         >
@@ -189,15 +210,18 @@ const Navigation = () => {
                                 )}
                             </div>
                         )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Mobile Navigation Links */}
-                <div className="md:hidden border-t border-white/20 py-4">
-                    <div className="flex flex-wrap gap-2">
+                {/* Mobile Navigation Links - Collapsible */}
+                {mobileMenuOpen && (
+                    <div className="md:hidden border-t border-white/20 py-3 bg-gradient-to-r from-purple-main to-purple-dark">
+                        <div className="flex flex-wrap gap-2 justify-center">
                         <Link 
                             to="/" 
                             className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-white/10"
+                            onClick={() => setMobileMenuOpen(false)}
                         >
                             <Home size={18} />
                             <span>Home</span>
@@ -205,6 +229,7 @@ const Navigation = () => {
                         <Link 
                             to="/movies" 
                             className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-white/10"
+                            onClick={() => setMobileMenuOpen(false)}
                         >
                             <Film size={18} />
                             <span>Movies</span>
@@ -212,6 +237,7 @@ const Navigation = () => {
                         <Link 
                             to="/about" 
                             className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-white/10"
+                            onClick={() => setMobileMenuOpen(false)}
                         >
                             <Info size={18} />
                             <span>About WAG</span>
@@ -221,16 +247,19 @@ const Navigation = () => {
                                 <Link 
                                     to="/admin/movies" 
                                     className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-white/10"
+                                    onClick={() => setMobileMenuOpen(false)}
                                 >
                                     <Plus size={18} />
                                     <span>Create Review</span>
                                 </Link>
                             </>
                         )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </nav>
+        </>
     );
 };
 

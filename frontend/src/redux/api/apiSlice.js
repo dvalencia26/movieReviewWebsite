@@ -7,8 +7,7 @@ const apiBaseUrl = isProduction
     ? 'https://wagwebsite-backend.onrender.com/api/v1'  // Hardcoded for production
     : BASE_URL; // Relative path for development
 
-console.log('🔧 Redux API - Mode:', import.meta.env.MODE);
-console.log('🔧 Redux API - Using baseUrl:', apiBaseUrl);
+
 
 // Base query with authentication headers and error handling
 const baseQuery = fetchBaseQuery({
