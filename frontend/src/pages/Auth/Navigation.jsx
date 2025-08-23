@@ -53,11 +53,7 @@ const Navigation = () => {
     };
 
     return (
-        <>
-            {/* Spacer div to push content below fixed nav */}
-            <div className="h-16"></div>
-            
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-main to-purple-dark shadow-lg backdrop-blur-sm">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-main to-purple-dark shadow-lg backdrop-blur-sm">
                 <div className="container mx-auto px-4">
                     <div className="flex justify-between items-center h-16">
                     {/* Left Section - Logo and Navigation Links */}
@@ -259,7 +255,6 @@ const Navigation = () => {
                 )}
             </div>
         </nav>
-        </>
     );
 };
 
