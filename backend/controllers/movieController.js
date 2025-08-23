@@ -1,6 +1,7 @@
 import Movie from "../models/Movie.js";
 import Review from "../models/Review.js";
 import Comment from "../models/Comment.js";
+import User from "../models/User.js";
 import tmdbService from "../services/tmdbService.js";
 import cacheService from "../services/cacheService.js";
 import asyncHandler from "../middlewares/asyncHandler.js";
@@ -773,7 +774,6 @@ export const getAdminFavoriteMovies = asyncHandler(async (req, res) => {
     }
     
     // Direct lookup for Billy (much faster than scanning all admins)
-    const User = (await import('../models/User.js')).default;
     const billy = await User.findOne({ 
       username: { $regex: /^billy$/i } // Case-insensitive match for "billy" or "Billy"
     }).select('favoritesReviewed');
@@ -999,7 +999,6 @@ export const getAdminWatchLaterMovies = asyncHandler(async (req, res) => {
     const limit = parseInt(req.query.limit) || 8;
     
     // Find admin users
-    const User = (await import('../models/User.js')).default;
     const adminUsers = await User.find({ isAdmin: true });
     
     if (!adminUsers || adminUsers.length === 0) {
