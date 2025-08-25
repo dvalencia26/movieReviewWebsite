@@ -2,11 +2,7 @@ import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import { BASE_URL } from "../constants";
 
 // Determine the API base URL
-const isProduction = import.meta.env.MODE === 'production';
-const apiBaseUrl = isProduction 
-    ? 'https://wagwebsite-backend.onrender.com/api/v1'  // Hardcoded for production
-    : BASE_URL; // Relative path for development
-
+const apiBaseUrl = '/api/v1'; // same-origin
 
 
 // Base query with authentication headers and error handling

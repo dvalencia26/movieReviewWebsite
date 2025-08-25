@@ -3,11 +3,7 @@ import axios from 'axios';
 class APIService {
   constructor() {
     // Determine the API base URL
-    const isProduction = import.meta.env.MODE === 'production';
-    const baseURL = isProduction 
-      ? 'https://wagwebsite-backend.onrender.com/api/v1'  // Hardcoded for production
-      : '/api/v1'; // Relative path for development
-    
+    const baseURL = '/api/v1'; // same-origin
 
     
     this.client = axios.create({
