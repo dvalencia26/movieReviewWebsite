@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../hooks/useFavorites';
 import { toast } from 'sonner';
 import Loader from '../../components/Loader';
+import apiService from '../../services/api';
 
 const Favorites = () => {
     const { userInfo } = useSelector((state) => state.auth);
@@ -39,9 +40,6 @@ const Favorites = () => {
             
             try {
                 setLoading(true);
-                
-                // Import apiService here to avoid circular dependency
-                const apiService = (await import('../../services/api')).default;
                 
                 // Fetch favorites and watchlist in parallel
                 const [favoritesResponse, watchlistResponse] = await Promise.all([
