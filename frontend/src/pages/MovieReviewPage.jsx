@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Calendar, Users, Heart, Clock, MessageCircle, Eye, Film, Edit } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Users, Heart, Clock, MessageCircle, Eye, Film, Edit, RefreshCw } from 'lucide-react';
 import { useGetMovieDetailsQuery, useGetMovieReviewsQuery, useGetReviewCommentsQuery, useAddCommentMutation } from '../redux/api/movies';
 import { useSelector } from 'react-redux';
 import { useFavorites } from '../hooks/useFavorites';
@@ -32,8 +32,8 @@ const MovieReviewPage = () => {
   // Review like handled via new Like model using LikeButton
 
   // Fetch movie details and reviews using Redux API
-  const { data: movieData, isLoading: movieLoading, error: movieError } = useGetMovieDetailsQuery(id);
-  const { data: reviewsData, isLoading: reviewsLoading, error: reviewsError } = useGetMovieReviewsQuery({
+  const { data: movieData, isLoading: movieLoading, error: movieError, refetch: refetchMovieDetails } = useGetMovieDetailsQuery(id);
+  const { data: reviewsData, isLoading: reviewsLoading, error: reviewsError, refetch: refetchReviews } = useGetMovieReviewsQuery({
     tmdbId: id,
     page: currentPage
   });
@@ -50,6 +50,9 @@ const MovieReviewPage = () => {
       }).unwrap();
       
       toast.success('Comment added successfully!');
+      // Automatically refetch comments and reviews
+      refetchReviews();
+      refetchMovieDetails();
       return true;
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -133,13 +136,18 @@ const MovieReviewPage = () => {
       refetchOnMountOrArgChange: true
     });
 
+    const handleCommentAdded = useCallback(() => {
+      // Refetch comments and also invalidate related caches
+      refetch();
+    }, [refetch]);
+
     return (
       <CommentSection
         reviewId={reviewId}
         initialComments={commentsData?.comments || []}
         onAddComment={handleAddComment}
         isLoading={commentsLoading}
-        onCommentAdded={refetch} // Refetch comments when new comment is added
+        onCommentAdded={handleCommentAdded}
       />
     );
   }, [handleAddComment]);

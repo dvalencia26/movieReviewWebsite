@@ -68,6 +68,7 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
             }),
             providesTags: (result, error, tmdbId) => [
                 { type: "Movies", id: tmdbId },
+                { type: "MovieDetails", id: tmdbId },
                 { type: "Reviews", id: `movie-${tmdbId}` }
             ],
             // Cache movie details for 30 minutes since they don't change often
@@ -103,8 +104,11 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: (result, error, { tmdbId }) => [
                 { type: "Movies", id: tmdbId },
+                { type: "MovieDetails", id: tmdbId },
                 { type: "Reviews", id: `movie-${tmdbId}` },
-                "Movies"
+                { type: "Reviews", id: tmdbId },
+                "Movies",
+                "Reviews"
             ],
         }),
         addComment: builder.mutation({
@@ -114,7 +118,11 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 body: commentData,
             }),
             invalidatesTags: (result, error, { reviewId }) => [
-                { type: "Comments", id: `${reviewId}-1` }
+                { type: "Comments", id: reviewId }, // Invalidate all comment pages for this review
+                { type: "Comments", id: `${reviewId}-1` },
+                { type: "Comments", id: `${reviewId}-2` },
+                { type: "Comments", id: `${reviewId}-3` },
+                "Comments" // Invalidate all comments
             ],
         }),
         toggleReviewLike: builder.mutation({
