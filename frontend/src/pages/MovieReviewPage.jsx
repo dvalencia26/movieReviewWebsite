@@ -192,11 +192,11 @@ const MovieReviewPage = () => {
         <div className="max-w-7xl mx-auto">
           {/* Back button */}
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="flex items-center space-x-2 text-purple-main hover:text-purple-dark mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
-            <span>Back to Movies</span>
+            <span>Back to Home</span>
           </button>
 
           {/* Movie Header */}

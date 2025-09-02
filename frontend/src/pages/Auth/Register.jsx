@@ -6,7 +6,7 @@ import Loader from "../../components/Loader";
 import { setCredentials } from "../../redux/api/features/auth/authSlice";
 import { useRegisterMutation } from "../../redux/api/users";
 import { toast } from "sonner";
-import WAGLogin from "../../assets/WAGLogin.png";
+import WAGLogin from "../../assets/WAGLogin.jpg";
 
 const Register = () => {
     const [username, setUsername] = useState("");
