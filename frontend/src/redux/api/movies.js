@@ -118,6 +118,61 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 method: "POST",
                 body: commentData,
             }),
+            async onQueryStarted({ reviewId, commentData }, { dispatch, getState, queryFulfilled }) {
+                // Optimistically insert the new comment
+                const state = getState();
+                const username = state?.auth?.userInfo?.username || 'You';
+                const tempId = `temp-${Date.now()}`;
+
+                const patchResult = dispatch(
+                    apiSlice.util.updateQueryData(
+                        'getReviewComments',
+                        { reviewId, page: 1 },
+                        (draft) => {
+                            if (!draft) return;
+                            if (!Array.isArray(draft.comments)) draft.comments = [];
+                            draft.comments.unshift({
+                                _id: tempId,
+                                reviewId,
+                                content: commentData?.content || '',
+                                parentComment: commentData?.parentId || null,
+                                likes: 0,
+                                likedBy: [],
+                                replyCount: 0,
+                                isPublished: true,
+                                author: { username },
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString(),
+                            });
+                        }
+                    )
+                );
+
+                try {
+                    const { data } = await queryFulfilled;
+                    // Replace temp comment with real one
+                    const realComment = data?.comment || data;
+                    if (realComment?._id) {
+                        dispatch(
+                            apiSlice.util.updateQueryData(
+                                'getReviewComments',
+                                { reviewId, page: 1 },
+                                (draft) => {
+                                    if (!draft?.comments) return;
+                                    const idx = draft.comments.findIndex(c => c._id === tempId);
+                                    if (idx !== -1) {
+                                        draft.comments[idx] = realComment;
+                                    }
+                                }
+                            )
+                        );
+                    }
+                } catch (e) {
+                    // Revert optimistic update on error
+                    patchResult.undo();
+                    console.error('Comment submission failed:', e);
+                }
+            },
             invalidatesTags: (result, error, { reviewId }) => [
                 { type: "Comments", id: reviewId }, // Invalidate all comment pages for this review
                 { type: "Comments", id: `${reviewId}-1` },

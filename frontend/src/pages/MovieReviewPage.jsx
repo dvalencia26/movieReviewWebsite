@@ -16,6 +16,7 @@ const MovieReviewPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
   const [collapsedReviews, setCollapsedReviews] = useState(new Set());
+  const [currentCommentCount, setCurrentCommentCount] = useState(0);
 
   // Favorites hook - Load data for this page
   const {
@@ -104,16 +105,7 @@ const MovieReviewPage = () => {
 
 
   // Component to show real-time comment count
-  const CommentCount = ({ reviewId }) => {
-    const { data: commentsData } = useGetReviewCommentsQuery({
-      reviewId,
-      page: 1
-    }, {
-      refetchOnMountOrArgChange: true
-    });
-
-    const commentCount = commentsData?.comments?.length || 0;
-
+  const CommentCount = ({ commentCount }) => {
     return (
       <div className="flex items-center space-x-1">
         <MessageCircle size={16} />
@@ -123,7 +115,7 @@ const MovieReviewPage = () => {
   };
 
   // Enhanced comment section component with real API integration - Memoized
-  const ReviewCommentSection = useCallback(({ reviewId }) => {
+  const ReviewCommentSection = useCallback(({ reviewId, onCommentCountChange }) => {
     const { data: commentsData, isLoading: commentsLoading, refetch } = useGetReviewCommentsQuery({
       reviewId,
       page: 1
@@ -131,6 +123,13 @@ const MovieReviewPage = () => {
       // Force refetch on mount to get fresh data
       refetchOnMountOrArgChange: true
     });
+
+    // Notify parent of comment count changes
+    React.useEffect(() => {
+      if (commentsData?.comments && onCommentCountChange) {
+        onCommentCountChange(commentsData.comments.length);
+      }
+    }, [commentsData?.comments, onCommentCountChange]);
 
     const handleCommentAdded = useCallback(() => {
       // Refetch comments and also invalidate related caches
@@ -456,7 +455,7 @@ const MovieReviewPage = () => {
                         variant="minimal"
                         showCount={true}
                       />
-                      <CommentCount reviewId={review._id} />
+                      <CommentCount commentCount={currentCommentCount} />
                       <span>•</span>
                       <span>{review.wordCount || 0} words</span>
                       <span>•</span>
@@ -464,7 +463,10 @@ const MovieReviewPage = () => {
                     </div>
 
                     {/* Comment Section for each review */}
-                    <ReviewCommentSection reviewId={review._id} />
+                    <ReviewCommentSection
+                      reviewId={review._id}
+                      onCommentCountChange={setCurrentCommentCount}
+                    />
                   </div>
                 ))}
               </div>

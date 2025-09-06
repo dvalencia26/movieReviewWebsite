@@ -160,7 +160,7 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
           <MessageCircle size={20} />
-          <span>Comments ({initialComments.length})</span>
+          <span>Comments ({nestedComments.length})</span>
         </h3>
         <button
           onClick={() => setShowComments(!showComments)}
