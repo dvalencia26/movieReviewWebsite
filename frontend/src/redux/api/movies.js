@@ -94,7 +94,8 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
             providesTags: (result, error, { reviewId, page }) => [
                 { type: "Comments", id: `${reviewId}-${page}` }
             ],
-            keepUnusedDataFor: 300,
+            keepUnusedDataFor: 0, // Disable caching
+            refetchOnMountOrArgChange: true, // Always refetch when component mounts
         }),
         createReview: builder.mutation({
             query: ({ tmdbId, reviewData }) => ({
