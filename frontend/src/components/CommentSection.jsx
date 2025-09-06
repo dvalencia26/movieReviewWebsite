@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useMemo } from 'react';
 import { MessageCircle, Send, Reply, User, MoreHorizontal } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -83,6 +83,42 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
   const [replyTo, setReplyTo] = useState(null);
   const [showComments, setShowComments] = useState(true);
 
+  // Memoize nested comment tree to avoid recomputation on unrelated re-renders
+  const nestedComments = useMemo(() => {
+    const comments = Array.isArray(initialComments) ? initialComments : [];
+    if (comments.length === 0) return [];
+
+    // If already nested, prefer top-level items
+    const hasRepliesArray = comments.some(c => Array.isArray(c.replies));
+    if (hasRepliesArray) {
+      return comments.filter(c => !c.parentComment);
+    }
+
+    const idToNode = new Map();
+    comments.forEach((c) => {
+      idToNode.set(c._id, { ...c, replies: [] });
+    });
+
+    const topLevel = [];
+    comments.forEach((c) => {
+      const node = idToNode.get(c._id);
+      const parentRef = c.parentComment;
+      if (parentRef) {
+        const parentId = typeof parentRef === 'string' ? parentRef : parentRef?._id || String(parentRef);
+        const parent = idToNode.get(parentId);
+        if (parent) {
+          parent.replies.push(node);
+        } else {
+          topLevel.push(node);
+        }
+      } else {
+        topLevel.push(node);
+      }
+    });
+
+    return topLevel;
+  }, [initialComments]);
+
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) {
@@ -94,7 +130,7 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
     try {
       await onAddComment({
         content: newComment,
-        parentId: replyTo?.id || null,
+        parentId: replyTo?._id || null,
         reviewId
       });
       
@@ -204,7 +240,7 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
               <p className="text-gray-500 mt-2">Loading comments...</p>
             </div>
           ) : initialComments.length > 0 ? (
-            initialComments.map((comment) => (
+            nestedComments.map((comment) => (
               <CommentItem key={comment._id} comment={comment} onReply={handleReplyClick} />
             ))
           ) : (

@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Calendar, Users, Heart, Clock, MessageCircle, Eye, Film, Edit, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Users, Heart, Clock, MessageCircle, Eye, Film, Edit } from 'lucide-react';
 import { useGetMovieDetailsQuery, useGetMovieReviewsQuery, useGetReviewCommentsQuery, useAddCommentMutation } from '../redux/api/movies';
 import { useSelector } from 'react-redux';
 import { useFavorites } from '../hooks/useFavorites';
@@ -16,7 +16,6 @@ const MovieReviewPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
   const [collapsedReviews, setCollapsedReviews] = useState(new Set());
-  const [reviewComments, setReviewComments] = useState({});
 
   // Favorites hook - Load data for this page
   const {
@@ -50,9 +49,6 @@ const MovieReviewPage = () => {
       }).unwrap();
       
       toast.success('Comment added successfully!');
-      // Automatically refetch comments and reviews
-      refetchReviews();
-      refetchMovieDetails();
       return true;
     } catch (error) {
       console.error('Error adding comment:', error);
