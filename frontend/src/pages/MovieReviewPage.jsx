@@ -45,7 +45,8 @@ const MovieReviewPage = () => {
         reviewId: commentData.reviewId,
         commentData: {
           content: commentData.content,
-          parentId: commentData.parentId
+          // Backend expects `parentComment`, not `parentId`
+          parentComment: commentData.parentId || null
         }
       }).unwrap();
       

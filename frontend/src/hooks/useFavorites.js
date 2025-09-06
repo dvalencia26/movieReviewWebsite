@@ -56,6 +56,15 @@ export const useFavorites = ({ autoLoad = false } = {}) => {
             toast.success('Added to favorites');
             return true;
         } catch (error) {
+            // Treat idempotent backend 400s as success for UI sync
+            const already = error?.response?.status === 400 && (
+                error?.response?.data?.error === 'Already favorited' ||
+                /already in favorites/i.test(error?.response?.data?.message || '')
+            );
+            if (already) {
+                setFavorites(prev => new Set([...prev, tmdbId]));
+                return true;
+            }
             console.error('Error adding to favorites:', error);
             toast.error('Failed to add to favorites');
             return false;
@@ -111,6 +120,14 @@ export const useFavorites = ({ autoLoad = false } = {}) => {
             toast.success('Added to watch later');
             return true;
         } catch (error) {
+            const already = error?.response?.status === 400 && (
+                error?.response?.data?.error === 'Already in watch later' ||
+                /already in watch later/i.test(error?.response?.data?.message || '')
+            );
+            if (already) {
+                setWatchLater(prev => new Set([...prev, tmdbId]));
+                return true;
+            }
             console.error('Error adding to watch later:', error);
             toast.error('Failed to add to watch later');
             return false;

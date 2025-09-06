@@ -135,7 +135,7 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                                 _id: tempId,
                                 reviewId,
                                 content: commentData?.content || '',
-                                parentComment: commentData?.parentId || null,
+                                parentComment: commentData?.parentComment || null,
                                 likes: 0,
                                 likedBy: [],
                                 replyCount: 0,
