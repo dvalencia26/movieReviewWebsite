@@ -45,8 +45,8 @@ const MovieReviewPage = () => {
         reviewId: commentData.reviewId,
         commentData: {
           content: commentData.content,
-          // Backend expects `parentComment`, not `parentId`
-          parentComment: commentData.parentId || null
+          // Only include parentComment if replying; avoid null to pass validation
+          ...(commentData.parentId ? { parentComment: commentData.parentId } : {})
         }
       }).unwrap();
       

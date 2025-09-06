@@ -24,8 +24,9 @@ export const useFavorites = ({ autoLoad = false } = {}) => {
             const favoriteIds = favoritesResponse.data.favorites?.map(item => item.tmdbId) || [];
             const watchLaterIds = watchLaterResponse.data.watchLater?.map(item => item.tmdbId) || [];
 
-            setFavorites(new Set(favoriteIds));
-            setWatchLater(new Set(watchLaterIds));
+            // Normalize to numbers for consistent Set keying
+            setFavorites(new Set(favoriteIds.map(id => typeof id === 'string' ? parseInt(id, 10) : id)));
+            setWatchLater(new Set(watchLaterIds.map(id => typeof id === 'string' ? parseInt(id, 10) : id)));
             setHasLoaded(true);
         } catch (error) {
             console.error('Error loading user lists:', error);
@@ -187,10 +188,16 @@ export const useFavorites = ({ autoLoad = false } = {}) => {
     }, [watchLater, removeFromWatchLater, addToWatchLater]);
 
     // Check if item is in favorites - Memoized for performance
-    const isFavorite = useCallback((tmdbId) => favorites.has(tmdbId), [favorites]);
+    const isFavorite = useCallback((tmdbId) => {
+        const idNum = typeof tmdbId === 'string' ? parseInt(tmdbId, 10) : tmdbId;
+        return favorites.has(idNum);
+    }, [favorites]);
 
     // Check if item is in watch later - Memoized for performance  
-    const isInWatchLater = useCallback((tmdbId) => watchLater.has(tmdbId), [watchLater]);
+    const isInWatchLater = useCallback((tmdbId) => {
+        const idNum = typeof tmdbId === 'string' ? parseInt(tmdbId, 10) : tmdbId;
+        return watchLater.has(idNum);
+    }, [watchLater]);
 
     // Check if action is loading - Memoized for performance
     const isActionLoading = useCallback((action, tmdbId) => actionLoading.has(`${action}-${tmdbId}`), [actionLoading]);
