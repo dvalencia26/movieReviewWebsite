@@ -158,10 +158,16 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                                 'getReviewComments',
                                 { reviewId, page: 1 },
                                 (draft) => {
-                                    if (!draft?.comments) return;
-                                    const idx = draft.comments.findIndex(c => c._id === tempId);
-                                    if (idx !== -1) {
-                                        draft.comments[idx] = realComment;
+                                    if (!draft) return;
+                                    if (!Array.isArray(draft.comments)) draft.comments = [];
+                                    const idxTemp = draft.comments.findIndex(c => c._id === tempId);
+                                    if (idxTemp !== -1) {
+                                        draft.comments[idxTemp] = realComment;
+                                        return;
+                                    }
+                                    const exists = draft.comments.some(c => c._id === realComment._id);
+                                    if (!exists) {
+                                        draft.comments.unshift(realComment);
                                     }
                                 }
                             )
