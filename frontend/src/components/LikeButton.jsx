@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
  * @param {boolean} showCount - Whether to show like count
  * @param {boolean} showUsers - Whether to show users who liked (on hover/click)
  * @param {string} variant - 'default', 'minimal', 'compact'
+ * @param {boolean} autoFetch - whether to fetch like data on mount (default true)
  */
 const LikeButton = memo(({ 
   contentType, 
@@ -24,14 +25,20 @@ const LikeButton = memo(({
   showCount = true,
   showUsers = false,
   variant = 'default',
-  className = ''
+  className = '',
+  autoFetch: autoFetchProp
 }) => {
   const { userInfo } = useSelector((state) => state.auth);
+  // Disable autoFetch for optimistic temp IDs to avoid 400s
+  const isTempId = typeof contentId === 'string' && contentId.startsWith('temp-');
+  const effectiveAutoFetch = typeof autoFetchProp === 'boolean' ? autoFetchProp : !isTempId;
+
   const { likeCount, isLiked, isLoading, toggleLike, getLikingUsers } = useLikes(
     contentType, 
     contentId, 
     initialLikeCount, 
-    initialLikedState
+    initialLikedState,
+    { autoFetch: effectiveAutoFetch }
   );
   
   const [showLikingUsers, setShowLikingUsers] = useState(false);
@@ -142,14 +149,16 @@ const LikeButton = memo(({
     <div className="relative">
       <button
         onClick={handleLikeClick}
-        disabled={isLoading}
+        disabled={isLoading || isTempId}
         className={`${getVariantStyles()} ${className} ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+          (isLoading || isTempId) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         } ${!userInfo ? 'cursor-not-allowed opacity-50' : ''}`}
         title={
           !userInfo 
             ? 'Login to like' 
-            : isLiked 
+            : isTempId
+              ? 'Please wait...'
+              : isLiked 
               ? `Unlike this ${contentType.toLowerCase()}` 
               : `Like this ${contentType.toLowerCase()}`
         }
