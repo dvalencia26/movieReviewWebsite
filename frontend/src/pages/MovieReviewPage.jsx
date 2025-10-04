@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Star, Calendar, Users, Heart, Clock, MessageCircle, Eye, Film, Edit } from 'lucide-react';
-import { useGetMovieDetailsQuery, useGetMovieReviewsQuery, useGetReviewCommentsQuery, useAddCommentMutation } from '../redux/api/movies';
+import { useGetMovieDetailsQuery, useGetMovieReviewsQuery, useAddCommentMutation } from '../redux/api/movies';
 import { useSelector } from 'react-redux';
 import { useFavorites } from '../hooks/useFavorites';
 import { toast } from 'sonner';
 import Loader from '../components/Loader';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
+import ReviewCommentSection from '../components/ReviewCommentSection';
 import { decodeHtmlEntities, formatTextContent } from '../utils/textUtils';
 
 const MovieReviewPage = () => {
@@ -115,38 +116,6 @@ const MovieReviewPage = () => {
     );
   };
 
-  // Enhanced comment section component with real API integration - Memoized
-  const ReviewCommentSection = useCallback(({ reviewId, onCommentCountChange }) => {
-    const { data: commentsData, isLoading: commentsLoading, refetch } = useGetReviewCommentsQuery({
-      reviewId,
-      page: 1
-    }, {
-      // Force refetch on mount to get fresh data
-      refetchOnMountOrArgChange: true
-    });
-
-    // Notify parent of comment count changes
-    React.useEffect(() => {
-      if (commentsData?.comments && onCommentCountChange) {
-        onCommentCountChange(commentsData.comments.length);
-      }
-    }, [commentsData?.comments, onCommentCountChange]);
-
-    const handleCommentAdded = useCallback(() => {
-      // Refetch comments and also invalidate related caches
-      refetch();
-    }, [refetch]);
-
-    return (
-      <CommentSection
-        reviewId={reviewId}
-        initialComments={commentsData?.comments || []}
-        onAddComment={handleAddComment}
-        isLoading={commentsLoading}
-        onCommentAdded={handleCommentAdded}
-      />
-    );
-  }, [handleAddComment]);
 
   // Loading state
   if (movieLoading || reviewsLoading) {
@@ -464,9 +433,10 @@ const MovieReviewPage = () => {
                     </div>
 
                     {/* Comment Section for each review */}
-                    <ReviewCommentSection
+                    <ReviewCommentSection 
+                      key={review._id}
                       reviewId={review._id}
-                      onCommentCountChange={setCurrentCommentCount}
+                      onAddComment={handleAddComment}
                     />
                   </div>
                 ))}
