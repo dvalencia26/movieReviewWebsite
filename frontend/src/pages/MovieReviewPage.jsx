@@ -189,25 +189,23 @@ const MovieReviewPage = () => {
                     </div>
                   )}
                 </div>
-                <div className="lg:w-2/3 p-8">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h1 className="text-4xl font-bold text-gray-900 mb-2">{movie.title}</h1>
-                      <div className="flex items-center space-x-6 text-gray-600 mb-4">
-                        <div className="flex items-center space-x-1">
-                          <Calendar size={18} />
-                          <span>{movie.releaseYear}</span>
-                        </div>
+                <div className="lg:w-2/3 p-4 sm:p-6 lg:p-8">
+                  <div className="mb-4">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{movie.title}</h1>
+                    <div className="flex items-center space-x-6 text-gray-600 mb-4">
+                      <div className="flex items-center space-x-1">
+                        <Calendar size={18} />
+                        <span>{movie.releaseYear}</span>
                       </div>
                     </div>
                     
-                    {/* Favorites and Watch Later buttons */}
+                    {/* Favorites and Watch Later buttons - Responsive layout */}
                     {userInfo && (
-                      <div className="flex items-center space-x-3 ml-4">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
                         <button
                           onClick={handleFavoriteToggle}
                           disabled={isActionLoading('favorite', id)}
-                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                          className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
                             isFavorite(id)
                               ? 'bg-red-500 text-white hover:bg-red-600'
                               : 'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600'
@@ -218,13 +216,13 @@ const MovieReviewPage = () => {
                           ) : (
                             <Heart size={18} className={isFavorite(id) ? 'fill-current' : ''} />
                           )}
-                          <span>{isFavorite(id) ? 'Favorited' : 'Add to Favorites'}</span>
+                          <span className="whitespace-nowrap">{isFavorite(id) ? 'Favorited' : 'Add to Favorites'}</span>
                         </button>
                         
                         <button
                           onClick={handleWatchLaterToggle}
                           disabled={isActionLoading('watchlater', id)}
-                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                          className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
                             isInWatchLater(id)
                               ? 'bg-blue-500 text-white hover:bg-blue-600'
                               : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600'
@@ -235,7 +233,7 @@ const MovieReviewPage = () => {
                           ) : (
                             <Clock size={18} />
                           )}
-                          <span>{isInWatchLater(id) ? 'Saved' : 'Watch Later'}</span>
+                          <span className="whitespace-nowrap">{isInWatchLater(id) ? 'Saved' : 'Watch Later'}</span>
                         </button>
                       </div>
                     )}
@@ -416,7 +414,7 @@ const MovieReviewPage = () => {
                       )}
                     </div>
                     
-                    <div className="flex items-center space-x-6 text-sm text-gray-500 mb-6">
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-gray-500 mb-6">
                       <LikeButton
                         contentType="Review"
                         contentId={review._id}
@@ -426,10 +424,10 @@ const MovieReviewPage = () => {
                         showCount={true}
                       />
                       <CommentCount commentCount={currentCommentCount} />
-                      <span>•</span>
-                      <span>{review.wordCount || 0} words</span>
-                      <span>•</span>
-                      <span>{review.readTime || 1} min read</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="whitespace-nowrap">{review.wordCount || 0} words</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="whitespace-nowrap">{review.readTime || 1} min read</span>
                     </div>
 
                     {/* Comment Section for each review */}

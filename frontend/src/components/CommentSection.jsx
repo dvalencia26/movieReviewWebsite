@@ -119,6 +119,18 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
     return topLevel;
   }, [initialComments]);
 
+  // Count total comments including all nested replies
+  const totalCommentCount = useMemo(() => {
+    const countReplies = (comment) => {
+      let count = 1; // Count the comment itself
+      if (comment.replies && comment.replies.length > 0) {
+        count += comment.replies.reduce((sum, reply) => sum + countReplies(reply), 0);
+      }
+      return count;
+    };
+    return nestedComments.reduce((sum, comment) => sum + countReplies(comment), 0);
+  }, [nestedComments]);
+
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) {
@@ -160,7 +172,7 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
           <MessageCircle size={20} />
-          <span>Comments ({nestedComments.length})</span>
+          <span>Comments ({totalCommentCount})</span>
         </h3>
         <button
           onClick={() => setShowComments(!showComments)}

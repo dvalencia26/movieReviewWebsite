@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useGetReviewCommentsQuery } from '../redux/api/movies';
 import CommentSection from './CommentSection';
 
@@ -6,8 +6,7 @@ const ReviewCommentSection = ({ reviewId, onAddComment }) => {
   const {
     data: commentsData,
     isLoading: commentsLoading,
-    isFetching: commentsFetching,
-    refetch
+    isFetching: commentsFetching
   } = useGetReviewCommentsQuery({
     reviewId,
     page: 1
@@ -15,11 +14,10 @@ const ReviewCommentSection = ({ reviewId, onAddComment }) => {
     refetchOnMountOrArgChange: true
   });
 
-  const handleCommentAdded = useCallback(async () => {
-    // Wait a moment then refetch to ensure server has processed
-    await new Promise(resolve => setTimeout(resolve, 100));
-    refetch();
-  }, [refetch]);
+  // No manual refetch needed - optimistic update handles UI, invalidatesTags handles sync
+  const handleCommentAdded = () => {
+    // Intentionally empty - optimistic update + cache invalidation handles everything
+  };
 
   return (
     <CommentSection
