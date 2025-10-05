@@ -11,20 +11,14 @@ const ReviewCommentSection = ({ reviewId, onAddComment }) => {
     reviewId,
     page: 1
   }, {
-    // Force refetch on mount to get fresh data
     refetchOnMountOrArgChange: true
   });
 
-  const handleCommentAdded = useCallback(() => {
-    console.log('Refetching comments for review:', reviewId); // Debug log
+  const handleCommentAdded = useCallback(async () => {
+    // Wait a moment then refetch to ensure server has processed
+    await new Promise(resolve => setTimeout(resolve, 100));
     refetch();
-  }, [refetch, reviewId]);
-
-  console.log('ReviewCommentSection render:', { // Debug log
-    reviewId,
-    commentsCount: commentsData?.comments?.length,
-    isLoading: commentsLoading
-  });
+  }, [refetch]);
 
   return (
     <CommentSection
