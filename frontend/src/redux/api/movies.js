@@ -94,7 +94,7 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
             providesTags: (result, error, { reviewId, page }) => [
                 { type: "Comments", id: `${reviewId}-${page}` }
             ],
-            keepUnusedDataFor: 0, // Disable caching
+            keepUnusedDataFor: 5, // Keep cache briefly to prevent blank screen during refetch
             refetchOnMountOrArgChange: true, // Always refetch when component mounts
         }),
         createReview: builder.mutation({
@@ -180,11 +180,7 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 }
             },
             invalidatesTags: (result, error, { reviewId }) => [
-                { type: "Comments", id: reviewId }, // Invalidate all comment pages for this review
-                { type: "Comments", id: `${reviewId}-1` },
-                { type: "Comments", id: `${reviewId}-2` },
-                { type: "Comments", id: `${reviewId}-3` },
-                "Comments" // Invalidate all comments
+                { type: "Comments", id: `${reviewId}-1` } // Only invalidate page 1 for this review
             ],
         }),
         toggleReviewLike: builder.mutation({

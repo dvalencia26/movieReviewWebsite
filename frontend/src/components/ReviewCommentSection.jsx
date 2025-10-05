@@ -6,6 +6,7 @@ const ReviewCommentSection = ({ reviewId, onAddComment }) => {
   const {
     data: commentsData,
     isLoading: commentsLoading,
+    isFetching: commentsFetching,
     refetch
   } = useGetReviewCommentsQuery({
     reviewId,
@@ -25,7 +26,7 @@ const ReviewCommentSection = ({ reviewId, onAddComment }) => {
       reviewId={reviewId}
       initialComments={commentsData?.comments || []}
       onAddComment={onAddComment}
-      isLoading={commentsLoading}
+      isLoading={commentsLoading || commentsFetching}
       onCommentAdded={handleCommentAdded}
     />
   );
