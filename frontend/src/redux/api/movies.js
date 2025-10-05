@@ -94,8 +94,8 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
             providesTags: (result, error, { reviewId, page }) => [
                 { type: "Comments", id: `${reviewId}-${page}` }
             ],
-            keepUnusedDataFor: 5, // Keep cache briefly to prevent blank screen during refetch
-            refetchOnMountOrArgChange: true, // Always refetch when component mounts
+            keepUnusedDataFor: 60, // Keep cache briefly to prevent blank screen during refetch
+            refetchOnMountOrArgChange: false, // Avoid immediately overwriting optimistic update
         }),
         createReview: builder.mutation({
             query: ({ tmdbId, reviewData }) => ({
@@ -173,15 +173,22 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                             )
                         );
                     }
+
+                    // OPTIONAL: now that the server has accepted the write, do a gentle sync pass.
+                    // This ensures counts/order are perfect without racing your optimistic UI.
+                    dispatch(
+                        moviesApiSlice.endpoints.getReviewComments.initiate(
+                            { reviewId, page: 1 },
+                            { forceRefetch: true }
+                        )
+                    );
                 } catch (e) {
                     // Revert optimistic update on error
                     patchResult.undo();
                     console.error('Comment submission failed:', e);
                 }
             },
-            invalidatesTags: (result, error, { reviewId }) => [
-                { type: "Comments", id: `${reviewId}-1` } // Only invalidate page 1 for this review
-            ],
+            invalidatesTags: [], // don't auto-refetch and overwrite the optimistic list
         }),
         toggleReviewLike: builder.mutation({
             query: ({ reviewId }) => ({

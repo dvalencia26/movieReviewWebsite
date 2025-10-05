@@ -88,35 +88,9 @@ const CommentSection = ({ reviewId, initialComments = [], onAddComment, isLoadin
     const comments = Array.isArray(initialComments) ? initialComments : [];
     if (comments.length === 0) return [];
 
-    // If already nested, prefer top-level items
-    const hasRepliesArray = comments.some(c => Array.isArray(c.replies));
-    if (hasRepliesArray) {
-      return comments.filter(c => !c.parentComment);
-    }
-
-    const idToNode = new Map();
-    comments.forEach((c) => {
-      idToNode.set(c._id, { ...c, replies: [] });
-    });
-
-    const topLevel = [];
-    comments.forEach((c) => {
-      const node = idToNode.get(c._id);
-      const parentRef = c.parentComment;
-      if (parentRef) {
-        const parentId = typeof parentRef === 'string' ? parentRef : parentRef?._id || String(parentRef);
-        const parent = idToNode.get(parentId);
-        if (parent) {
-          parent.replies.push(node);
-        } else {
-          topLevel.push(node);
-        }
-      } else {
-        topLevel.push(node);
-      }
-    });
-
-    return topLevel;
+    // Backend already returns nested structure with replies arrays
+    // Just filter to get top-level comments (those without parentComment)
+    return comments.filter(c => !c.parentComment);
   }, [initialComments]);
 
   // Count total comments including all nested replies

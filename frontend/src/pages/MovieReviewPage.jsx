@@ -40,14 +40,13 @@ const MovieReviewPage = () => {
   });
 
   // Handle comment submission
-  const handleAddComment = async (commentData) => {
+  const handleAddComment = async ({ content, parentId, reviewId }) => {
     try {
       await addComment({
-        reviewId: commentData.reviewId,
-        commentData: {
-          content: commentData.content,
-          // Only include parentComment if replying; avoid null to pass validation
-          ...(commentData.parentId ? { parentComment: commentData.parentId } : {})
+        reviewId,
+        commentData: { 
+          content, 
+          parentComment: parentId ?? null 
         }
       }).unwrap();
       
