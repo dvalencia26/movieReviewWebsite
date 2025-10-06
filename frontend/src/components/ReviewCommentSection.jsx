@@ -10,13 +10,11 @@ const ReviewCommentSection = ({ reviewId, onAddComment }) => {
   } = useGetReviewCommentsQuery({
     reviewId,
     page: 1
-  }, {
-    refetchOnMountOrArgChange: true
   });
 
-  // No manual refetch needed - optimistic update handles UI, invalidatesTags handles sync
+  // Cache invalidation handles refetching automatically
   const handleCommentAdded = () => {
-    // Intentionally empty - optimistic update + cache invalidation handles everything
+    // Intentionally empty - invalidatesTags handles refetch
   };
 
   return (

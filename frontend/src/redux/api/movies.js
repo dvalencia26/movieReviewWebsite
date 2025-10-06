@@ -94,8 +94,7 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
             providesTags: (result, error, { reviewId, page }) => [
                 { type: "Comments", id: `${reviewId}-${page}` }
             ],
-            keepUnusedDataFor: 60, // Keep cache briefly to prevent blank screen during refetch
-            refetchOnMountOrArgChange: false, // Avoid immediately overwriting optimistic update
+            keepUnusedDataFor: 5, // Short cache to ensure fresh data
         }),
         createReview: builder.mutation({
             query: ({ tmdbId, reviewData }) => ({
@@ -118,25 +117,9 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 method: "POST",
                 body: commentData,
             }),
-            async onQueryStarted({ reviewId }, { dispatch, queryFulfilled }) {
-                try {
-                    // Wait for the server to confirm the comment was added
-                    await queryFulfilled;
-                    
-                    // Refetch the comments to get the updated tree structure
-                    // This ensures both top-level and nested comments appear correctly
-                    dispatch(
-                        moviesApiSlice.endpoints.getReviewComments.initiate(
-                            { reviewId, page: 1 },
-                            { forceRefetch: true }
-                        )
-                    );
-                } catch (error) {
-                    // Error is handled by the calling component
-                    console.error('Comment submission failed:', error);
-                }
-            },
-            invalidatesTags: [], // Using manual refetch instead of auto-invalidation
+            invalidatesTags: (result, error, { reviewId }) => [
+                { type: "Comments", id: `${reviewId}-1` }
+            ],
         }),
         toggleReviewLike: builder.mutation({
             query: ({ reviewId }) => ({
