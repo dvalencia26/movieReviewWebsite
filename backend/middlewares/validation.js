@@ -72,7 +72,7 @@ export const validateComment = [
     .withMessage('Comment must be between 1 and 1000 characters'),
   
   body('parentComment')
-    .optional()
+    .optional({ nullable: true, checkFalsy: true })
     .isMongoId()
     .withMessage('Parent comment must be a valid MongoDB ObjectId'),
   

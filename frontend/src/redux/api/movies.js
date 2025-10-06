@@ -118,77 +118,25 @@ export const moviesApiSlice = apiSlice.injectEndpoints({
                 method: "POST",
                 body: commentData,
             }),
-            async onQueryStarted({ reviewId, commentData }, { dispatch, getState, queryFulfilled }) {
-                // Optimistically insert the new comment
-                const state = getState();
-                const username = state?.auth?.userInfo?.username || 'You';
-                const tempId = `temp-${Date.now()}`;
-
-                const patchResult = dispatch(
-                    apiSlice.util.updateQueryData(
-                        'getReviewComments',
-                        { reviewId, page: 1 },
-                        (draft) => {
-                            if (!draft) return;
-                            if (!Array.isArray(draft.comments)) draft.comments = [];
-                            draft.comments.unshift({
-                                _id: tempId,
-                                reviewId,
-                                content: commentData?.content || '',
-                                parentComment: commentData?.parentComment || null,
-                                likes: 0,
-                                likedBy: [],
-                                replyCount: 0,
-                                isPublished: true,
-                                author: { username },
-                                createdAt: new Date().toISOString(),
-                                updatedAt: new Date().toISOString(),
-                            });
-                        }
-                    )
-                );
-
+            async onQueryStarted({ reviewId }, { dispatch, queryFulfilled }) {
                 try {
-                    const { data } = await queryFulfilled;
-                    // Replace temp comment with real one
-                    const realComment = data?.comment || data;
-                    if (realComment?._id) {
-                        dispatch(
-                            apiSlice.util.updateQueryData(
-                                'getReviewComments',
-                                { reviewId, page: 1 },
-                                (draft) => {
-                                    if (!draft) return;
-                                    if (!Array.isArray(draft.comments)) draft.comments = [];
-                                    const idxTemp = draft.comments.findIndex(c => c._id === tempId);
-                                    if (idxTemp !== -1) {
-                                        draft.comments[idxTemp] = realComment;
-                                        return;
-                                    }
-                                    const exists = draft.comments.some(c => c._id === realComment._id);
-                                    if (!exists) {
-                                        draft.comments.unshift(realComment);
-                                    }
-                                }
-                            )
-                        );
-                    }
-
-                    // OPTIONAL: now that the server has accepted the write, do a gentle sync pass.
-                    // This ensures counts/order are perfect without racing your optimistic UI.
+                    // Wait for the server to confirm the comment was added
+                    await queryFulfilled;
+                    
+                    // Refetch the comments to get the updated tree structure
+                    // This ensures both top-level and nested comments appear correctly
                     dispatch(
                         moviesApiSlice.endpoints.getReviewComments.initiate(
                             { reviewId, page: 1 },
                             { forceRefetch: true }
                         )
                     );
-                } catch (e) {
-                    // Revert optimistic update on error
-                    patchResult.undo();
-                    console.error('Comment submission failed:', e);
+                } catch (error) {
+                    // Error is handled by the calling component
+                    console.error('Comment submission failed:', error);
                 }
             },
-            invalidatesTags: [], // don't auto-refetch and overwrite the optimistic list
+            invalidatesTags: [], // Using manual refetch instead of auto-invalidation
         }),
         toggleReviewLike: builder.mutation({
             query: ({ reviewId }) => ({
