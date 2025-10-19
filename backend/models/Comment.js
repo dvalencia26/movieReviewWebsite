@@ -202,7 +202,7 @@ commentSchema.statics.getCommentTree = async function(reviewId) {
   // Get all comments for the review
   const comments = await this.find({ reviewId, isPublished: true })
     .populate('author', 'username')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: 1 });
   
   // Build tree structure
   const commentMap = new Map();
