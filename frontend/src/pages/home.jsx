@@ -25,7 +25,7 @@ const Home = () => {
     // Fetch data from admin's database
     const { data: favoritesData, isLoading: favoritesLoading, error: favoritesError } = useGetAdminFavoriteMoviesQuery({ limit: 8 });
     const { data: trendingData, isLoading: trendingLoading, error: trendingError } = useGetHighestRatedMoviesQuery({ limit: 8 });
-    const { data: recentData, isLoading: recentLoading, error: recentError } = useGetRecentlyReviewedMoviesQuery({ limit: 6 });
+    const { data: recentData, isLoading: recentLoading, error: recentError } = useGetRecentlyReviewedMoviesQuery({ limit: 8 });
 
     // Get data from queries
     const favorites = favoritesData?.movies || [];
@@ -136,7 +136,7 @@ const Home = () => {
                 <SectionSkeleton title="Latest Reviews">
                     {recentLoading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {[...Array(6)].map((_, index) => (
+                            {[...Array(8)].map((_, index) => (
                                 <ReviewCardSkeleton key={index} />
                             ))}
                         </div>

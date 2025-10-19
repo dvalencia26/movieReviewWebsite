@@ -199,19 +199,27 @@ commentSchema.statics.findByAuthor = function(authorId) {
 };
 
 commentSchema.statics.getCommentTree = async function(reviewId) {
-  // Get all comments for the review
+  // Fetch as plain objects so we can attach reply arrays without losing data
   const comments = await this.find({ reviewId, isPublished: true })
     .populate('author', 'username')
-    .sort({ createdAt: 1 });
+    .sort({ createdAt: 1 })
+    .lean({ virtuals: true });
   
-  // Build tree structure
+  if (comments.length === 0) {
+    return [];
+  }
+  
   const commentMap = new Map();
   const topLevelComments = [];
   
+  // First pass: prime the map and prepare reply containers
   comments.forEach(comment => {
     comment.replies = [];
     commentMap.set(comment._id.toString(), comment);
-    
+  });
+  
+  // Second pass: attach replies to their parent
+  comments.forEach(comment => {
     if (comment.parentComment) {
       const parent = commentMap.get(comment.parentComment.toString());
       if (parent) {
